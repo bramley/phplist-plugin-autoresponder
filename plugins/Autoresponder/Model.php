@@ -76,6 +76,7 @@ class Autoresponder_Model {
         global $tables;
         
         $ars = $this->getAutoresponders();
+        $messagesSubmitted = array();
         
         foreach ($ars as $ar) {
             if (!$ar['enabled']) {
@@ -91,14 +92,15 @@ class Autoresponder_Model {
                         "INNER JOIN " . $tables['message'] . " m ON ar.mid = m.id " .
                         "INNER JOIN " . $tables['listmessage'] . " lm ON m.id = lm.messageid " .
                         "INNER JOIN " . $tables['listuser'] . " lu ON lm.listid = lu.listid " .
-                        "LEFT JOIN " . $tables['usermessage'] . " um ON lu.userid = um.userid " .
+                        "INNER JOIN " . $tables['user'] . " u ON u.id = lu.userid AND u.confirmed = 1 AND u.blacklisted = 0 " .
+                        "LEFT JOIN " . $tables['usermessage'] . " um ON lu.userid = um.userid AND um.messageid = m.id " .
                         "WHERE ar.id = " . $ar['id'] . " AND ";
                     
                 if ($ar['new']) {
-                    $q .= "lu.entered > ar.entered AND ";                
+                    $q .= "lu.modified > ar.entered AND ";                
                 }
                 
-                $q .= "(UNIX_TIMESTAMP(lu.entered) + (ar.mins * 60)) < UNIX_TIMESTAMP(now()) AND " .
+                $q .= "(UNIX_TIMESTAMP(lu.modified) + (ar.mins * 60)) < UNIX_TIMESTAMP(now()) AND " .
                       "um.userid IS NULL GROUP BY lu.userid";
                       
                 $qs[] = $q;
@@ -115,6 +117,7 @@ class Autoresponder_Model {
                 
                     Sql_Query(
                         sprintf("UPDATE " . $tables['message'] . " SET status = 'submitted' WHERE (status = 'sent' OR status = 'draft') AND id = %d", $ar['mid']));
+                    $messagesSubmitted[] = $ar['mid'];
                 }
                 else { 
                     Sql_Query(
@@ -129,7 +132,7 @@ class Autoresponder_Model {
             }
         }
 
-        return true;
+        return count($messagesSubmitted) . ' messages submitted';
     }
     
     public function getListNames() {
