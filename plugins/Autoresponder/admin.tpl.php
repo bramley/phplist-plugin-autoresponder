@@ -68,7 +68,7 @@
     <div class="ar-admin-process">
         <h1>Process Autoresponders</h1>
         <hr />
-        <form id="ar-admin-process-form" action="<?php print $process; ?>" method="get">
+        <form id="ar-admin-process-form" action="<?php print $process; ?>" method="post">
             <input type="hidden" name="key" value="<?php print $key; ?>">
             <p>Click the button below to manually call the process script. See the INSTALL.txt for instructions on how to automate in cron.</p>
             <p>Last ran: <em><?php print $last_process ? $last_process : 'never'; ?></em></p>

@@ -77,7 +77,7 @@ class Autoresponder_Controller {
             'possible' => $this->model->getPossibleMessages(),
             'key' => $this->model->getKey(),
             'last_process' => $this->model->getLastProcess(),
-            'process' => AutoResponder_Util::pluginPathURL('Autoresponder') . '/process.php'
+            'process' => AutoResponder_Util::pluginURL('process', array('pi' => 'Autoresponder', 'key' => $this->model->getKey()))
         );
         
         return $this->view('admin', $vars);
