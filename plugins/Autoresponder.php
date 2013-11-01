@@ -18,16 +18,27 @@
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
  * @link      http://brightflock.com
  */
-class Autoresponder extends phplistPlugin {
-    public $name = "Autoresponder";
-    public $coderoot;
-    
-    function adminmenu() {
-        return array("main" => "Autoresponder");
-    }
-    
-    public function __construct() {
+class Autoresponder extends phplistPlugin
+{
+    const VERSION_FILE = 'version.txt';
+
+    public $name = 'Autoresponder';
+    public $enabled = true;
+    public $authors = 'Cameron Lerch, Duncan Cameron';
+    public $description = 'Provides an autoresponder';
+    public $topMenuLinks = array(
+        'main' => array('category' => 'campaigns')
+    );
+    public $pageTitles = array(
+        'main' => 'Autoresponder'
+    );
+
+    public function __construct()
+    {
         $this->coderoot = dirname(__FILE__) . '/Autoresponder/';
+        $this->version = (is_file($f = $this->coderoot . self::VERSION_FILE))
+            ? file_get_contents($f)
+            : '';
+        parent::__construct();
     }
 }
-?>
