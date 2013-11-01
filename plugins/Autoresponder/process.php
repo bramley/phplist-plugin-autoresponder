@@ -27,15 +27,14 @@
  * See the admin menu item for the exact url with your unique key
  */
  
-require_once('bootstrap.php');
-
 require_once(dirname(__FILE__) . '/Util.php');
 require_once(dirname(__FILE__) . '/Model.php');
 require_once(dirname(__FILE__) . '/Controller.php');
 
 $controller = new Autoresponder_Controller();
 
-if (!$controller->process()) {
+if (!($result = $controller->process())) {
     print "Could not process Autoresponders--invalid key?";
 }
+echo $result;
 ?>
