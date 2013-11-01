@@ -1,0 +1,27 @@
+To install the Autoresponder plugin:
+
+1. Unpackage into your phplist plugins dir as you would with any plugin
+
+2. Ensure that the .htaccess file included with the plugin package exists--this will allow you to call the process.php
+   script from cron. If you're not using apache, you will need to allow execution of process.php.
+  
+3. Visit the autoresponder section in phplist admin. Click on the Process Autoresponders button to determine what URL to
+   setup in cron.
+   
+4. Copy the URL from #3 and setup a cron process to call the URL at regular intervals. For example:
+   wget -O - -q -t 1 http://yourphplistdomain.com/admin/plugins/Autoresponder/process.php?key=your_key
+   
+   The process.php file is responsible for preparing the message queue ahead of phplist's regular old processqueue. Once
+   Autoresponder's process.php runs, the messages will start sending the next time processqueue runs.
+   
+5. Add some draft messages to use as Autoresponders. The Autoresponder plugin uses draft messages as the message that are
+   sent as an autoresponder. Be sure that you select some lists in your draft message--new members of the lists you selected
+   will get the autoresponder message.
+
+6. Create an autoresponder in the phplist admin section. For each autoresponder created you will get a new user attribute. That
+   user attribute will be populated with the date the message was sent to the user. If the attribute is empty, the message has
+   not been sent.
+
+For support: 
+
+http://brightflock.com/phplist-autoresponder
