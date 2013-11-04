@@ -26,6 +26,7 @@ class Autoresponder extends phplistPlugin
     public $enabled = true;
     public $authors = 'Cameron Lerch, Duncan Cameron';
     public $description = 'Provides an autoresponder';
+    public $commandlinePluginPages = array('process');
     public $topMenuLinks = array(
         'main' => array('category' => 'campaigns')
     );

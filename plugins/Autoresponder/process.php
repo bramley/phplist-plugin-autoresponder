@@ -20,21 +20,23 @@
  */
  
 /**
- * Call this script with wget from cron at regular intervals. For example:
  * 
- * wget -O - -q -t 1 http://yourphplistdomain.com/admin/plugins/Autoresponder/process.php?key=your_key
  * 
- * See the admin menu item for the exact url with your unique key
  */
- 
+if ($GLOBALS["commandline"]) {
+    ob_end_clean();
+    ob_start();
+}
+
 require_once(dirname(__FILE__) . '/Util.php');
 require_once(dirname(__FILE__) . '/Model.php');
 require_once(dirname(__FILE__) . '/Controller.php');
 
 $controller = new Autoresponder_Controller();
 
-if (!($result = $controller->process())) {
-    print "Could not process Autoresponders--invalid key?";
+$result = $controller->process();
+echo "$result messages processed";
+
+if ($GLOBALS["commandline"]) {
+    ob_flush();
 }
-echo $result;
-?>
