@@ -274,34 +274,12 @@ class Autoresponder_Model {
         return Sql_Fetch_Array($res);
     }
     
-    public function getKey() {
-        static $key = null;
-        
-        if ($key === null) {
-            global $tables;
-            
-            // We pull this out ourselves as getConfig will cache a null value the first time called
-            $res = Sql_Query("SELECT value FROM " . $tables["config"] . " WHERE item = 'autoresponder_key'");
-            $row = Sql_Fetch_Array($res);
-            
-            if (isset($row['value'])) {
-                $key = $row['value'];
-            }
-        }
-        
-        return $key;
-    }
-    
     private static function init() {
         global $tables;
         global $table_prefix;
         
         if (!Sql_Table_exists($table_prefix . self::$TABLE)) {
             Sql_Query("CREATE TABLE " . $table_prefix . self::$TABLE . " (id INT(11) NOT NULL AUTO_INCREMENT, enabled BOOL NOT NULL, mid INT(11) NOT NULL, mins INT(11) NOT NULL, new BOOL NOT NULL, entered DATETIME NOT NULL, PRIMARY KEY(id))");
-        }
-        
-        if (!(getConfig('autoresponder_key'))) {
-            SaveConfig('autoresponder_key', md5(uniqid(mt_rand())), 0);
         }
     }
 }

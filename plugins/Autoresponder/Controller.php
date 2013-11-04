@@ -61,10 +61,6 @@ class Autoresponder_Controller {
     }
     
     public function process() {
-        if (!isset($_GET['key']) || strval($_GET['key']) != $this->model->getKey()) {
-            return false;
-        }
-        
         $this->model->setLastProcess();
         
         return $this->model->setPending(); 
@@ -75,9 +71,8 @@ class Autoresponder_Controller {
             'params' => $params,
             'current' => $this->model->getAutoresponders(),
             'possible' => $this->model->getPossibleMessages(),
-            'key' => $this->model->getKey(),
             'last_process' => $this->model->getLastProcess(),
-            'process' => AutoResponder_Util::pluginURL('process', array('pi' => 'Autoresponder', 'key' => $this->model->getKey()))
+            'process' => AutoResponder_Util::pluginURL('process', array('pi' => 'Autoresponder'))
         );
         
         return $this->view('admin', $vars);
