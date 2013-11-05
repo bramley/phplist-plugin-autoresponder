@@ -1,3 +1,7 @@
+version 2013-11-05
+      Removed key and related processing
+      Added command line processing of process.php
+
 version 2013-11-01
     2013-11-01  Added to GitHub
 
