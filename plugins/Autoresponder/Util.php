@@ -45,11 +45,6 @@ class AutoResponder_Util {
         return $plugins[$name]->coderoot;
     }
     
-    public static function pluginPathURL($name) {
-         // XXX-CL we assume a relative plugin root dir
-        return '/admin/' . PLUGIN_ROOTDIR . '/' . $name;
-    }
-    
     public static function pluginURL($page, Array $params = array()) {
         $p = array();
 
