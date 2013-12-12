@@ -71,6 +71,7 @@ The phplist process queue command still needs to be run in order to actually sen
 ## Version history ##
 
     version     Description
+    2013-12-12  Workaround for phplist bug - Mantis 16940
     2013-11-05  Removed key processing, added command line support
     2013-11-01  Added to GitHub
     2013-10-31  Initial version for phplist 3.0.x converted from 2.10 version
