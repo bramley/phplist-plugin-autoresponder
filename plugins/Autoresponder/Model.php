@@ -32,7 +32,7 @@ class Autoresponder_Model {
         $res = Sql_Query("SELECT GROUP_CONCAT(DISTINCT lm.listid SEPARATOR ',') AS list_ids, m.id, m.subject FROM " . $tables['message'] . " m " .
             "INNER JOIN " . $tables['listmessage'] . " lm ON m.id = lm.messageid " .
             "LEFT JOIN " . $table_prefix . self::$TABLE . " ar ON m.id = ar.mid " .
-            "WHERE status = 'draft' AND ar.id IS NULL " .
+            "WHERE status = 'draft' AND ar.id IS NULL AND lm.listid != 0 " .
             "GROUP BY m.id");
         
         $messages = array();
@@ -86,22 +86,25 @@ class Autoresponder_Model {
             $attribute = $this->getAttribute($ar['id']);
             
             $qs = array();
+            $table = $table_prefix . self::$TABLE;
             
             foreach (array('COUNT(*)', $attribute['id'] . ' AS attributeid, lu.userid AS userid, now() AS value') as $select) {
-                $q = "SELECT " . $select . " FROM " . $table_prefix . self::$TABLE . " ar " .
-                        "INNER JOIN " . $tables['message'] . " m ON ar.mid = m.id " .
-                        "INNER JOIN " . $tables['listmessage'] . " lm ON m.id = lm.messageid " .
-                        "INNER JOIN " . $tables['listuser'] . " lu ON lm.listid = lu.listid " .
-                        "INNER JOIN " . $tables['user'] . " u ON u.id = lu.userid AND u.confirmed = 1 AND u.blacklisted = 0 " .
-                        "LEFT JOIN " . $tables['usermessage'] . " um ON lu.userid = um.userid AND um.messageid = m.id " .
-                        "WHERE ar.id = " . $ar['id'] . " AND ";
+                $q = "
+                    SELECT $select
+                    FROM $table ar
+                        INNER JOIN {$tables['message']} m ON ar.mid = m.id
+                        INNER JOIN {$tables['listmessage']} lm ON m.id = lm.messageid
+                        INNER JOIN {$tables['listuser']} lu ON lm.listid = lu.listid
+                        INNER JOIN {$tables['user']} u ON u.id = lu.userid AND u.confirmed = 1 AND u.blacklisted = 0
+                        LEFT JOIN {$tables['usermessage']} um ON lu.userid = um.userid AND um.messageid = m.id
+                        WHERE ar.id = {$ar['id']}";
                     
                 if ($ar['new']) {
-                    $q .= "lu.modified > ar.entered AND ";                
+                    $q .= " AND lu.modified > ar.entered";
                 }
                 
-                $q .= "(UNIX_TIMESTAMP(lu.modified) + (ar.mins * 60)) < UNIX_TIMESTAMP(now()) AND " .
-                      "um.userid IS NULL GROUP BY lu.userid";
+                $q .= " AND (UNIX_TIMESTAMP(lu.modified) + (ar.mins * 60)) < UNIX_TIMESTAMP(now())
+                      AND um.userid IS NULL GROUP BY lu.userid";
                       
                 $qs[] = $q;
             }
@@ -160,11 +163,16 @@ class Autoresponder_Model {
             
             global $tables;
             global $table_prefix;
-            
-            $res = Sql_Query("SELECT ar.*, m.subject, GROUP_CONCAT(DISTINCT lm.listid SEPARATOR ',') AS list_ids FROM " . $table_prefix . self::$TABLE . " ar " .
-                "INNER JOIN " . $tables['message'] . " m ON ar.mid = m.id " .
-                "INNER JOIN " . $tables['listmessage'] . " lm ON m.id = lm.messageid " .
-                "GROUP BY ar.id");
+
+            $table = $table_prefix . self::$TABLE;
+            $res = Sql_Query("
+                SELECT ar.*, m.subject, GROUP_CONCAT(DISTINCT lm.listid SEPARATOR ',') AS list_ids
+                FROM $table ar 
+                INNER JOIN {$tables['message']} m ON ar.mid = m.id
+                INNER JOIN {$tables['listmessage']} lm ON m.id = lm.messageid
+                WHERE lm.listid != 0
+                GROUP BY ar.id
+            ");
             
             $listNames = $this->getListNames();
             
@@ -306,5 +314,3 @@ function autoresponder_sort($a, $b) {
     
     return 0;
 }
-
-?>
