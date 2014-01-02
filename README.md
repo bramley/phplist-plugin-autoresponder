@@ -25,6 +25,12 @@ The benefit of this is that plugins will not be affected when you upgrade phplis
 ### Install through phplist ###
 Install on the Plugins page (menu Config > Plugins) using the package URL `https://github.com/bramley/phplist-plugin-autoresponder/archive/master.zip`.
 
+There is a bug that can cause a plugin to be incompletely installed on some configurations (<https://mantis.phplist.com/view.php?id=16865>). 
+Check that these files are in the plugin directory. If not then you will need to install manually.
+
+* the file Autoresponder.php
+* the directory Autoresponder
+
 ### Install manually ###
 Download the plugin zip file from <https://github.com/bramley/phplist-plugin-autoresponder/archive/master.zip>
 
