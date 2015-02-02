@@ -1,7 +1,7 @@
 <?php
 /**
  * Autoresponder plugin for phplist
- * 
+ *
  * This plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -10,7 +10,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * @category  phplist
  * @package   Autoresponder
  * @author    Cameron Lerch (Sponsored by Brightflock -- http://brightflock.com)
@@ -18,34 +18,63 @@
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
  * @link      http://brightflock.com
  */
-class AutoResponder_Util {
-    public static function formatMinutes($mins) {
-        if ($mins < 60) {
-            return $mins . ' Minutes';
+class AutoResponder_Util
+{
+
+    public static function formatMinutes($mins)
+    {
+        if (is_int($years = $mins / 60 / 24 / 7 / 52)) {
+            return $years . ' year' . ($years <> 1 ? 's' : '');
         }
-        
-        if ($mins < 1440) {
-            return ($mins / 60) . ' Hours';
+
+        if (is_int($weeks = $mins / 60 / 24 / 7)) {
+            return $weeks . ' week' . ($weeks <> 1 ? 's' : '');
         }
-    
-        if ($mins < 10080) {
-            return ($mins / 60 / 24) . ' Days';
+
+        if (is_int($days = $mins / 60 / 24)) {
+            return $days . ' day' . ($days <> 1 ? 's' : '');
         }
-        
-        if ($mins < 524160) {
-            return ($mins / 60 / 24 / 7) . ' Weeks';
+
+        if (is_int($hours = $mins / 60)) {
+            return $hours . ' hour' . ($hours <> 1 ? 's' : '');
         }
-        
-        return ($mins / 60 / 24 / 7 / 52) . ' Years';
+
+        return $mins . ' minute' . ($mins <> 1 ? 's' : '');
+
     }
-    
-    public static function pluginRoot($name) {
+
+    public static function formatMinutes1($mins) {
+        if ($mins < 60) {
+            return $mins . ' minute' . ($mins <> 1 ? 's' : '');
+        }
+
+        if ($mins < 1440) {
+            $hours = $mins / 60;
+            return $hours . ' hour' . ($hours <> 1 ? 's' : '');
+        }
+
+        if ($mins < 10080) {
+            $days = $mins / 60 / 24;
+            return $days . ' day' . ($days <> 1 ? 's' : '');
+        }
+
+        if ($mins < 524160) {
+            $weeks = $mins / 60 / 24 / 7;
+            return $weeks . ' week' . ($weeks <> 1 ? 's' : '');
+        }
+        $years = $mins / 60 / 24 / 7 / 52;
+        return $years . ' year' . ($years <> 1 ? 's' : '');
+    }
+
+    public static function pluginRoot($name)
+    {
         global $plugins;
-        
+
         return $plugins[$name]->coderoot;
     }
-    
-    public static function pluginURL($page, Array $params = array()) {
+
+    public static function pluginURL($page = '', Array $params = array())
+    {
         $p = array();
 
         if ($page) {
@@ -57,10 +86,10 @@ class AutoResponder_Util {
 
         return './?' . http_build_query($p + $params, '', '&');
     }
-    
-    public static function pluginRedirect($page) {
+
+    public static function pluginRedirect($page = '')
+    {
         header("Location: " . self::pluginURL($page));
         exit;
     }
 }
-?>

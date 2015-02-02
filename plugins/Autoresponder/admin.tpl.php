@@ -1,7 +1,7 @@
 <?php
 /**
  * Autoresponder plugin for phplist
- * 
+ *
  * This plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -10,7 +10,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * @category  phplist
  * @package   Autoresponder
  * @author    Cameron Lerch (Sponsored by Brightflock -- http://brightflock.com)
@@ -57,7 +57,7 @@
                             <td class="listingelement"><?php print $item['new'] ? 'yes' : 'no'; ?></td>
                             <td class="listingelement"><a href="<?php print Autoresponder_Util::pluginURL(null, array('toggleEnabled' => 1, 'id' => $item['id'])); ?>"><?php print ($item['enabled'] ? 'yes' : 'no'); ?></a></td>
                             <td class="listingelement"><a href="<?php print Autoresponder_Util::pluginURL(null, array('delete' => 1, 'id' => $item['id'])); ?>">delete</a></td>
-                        </tr>                
+                        </tr>
                     <?php } ?>
                 </tbody>
             </table>
@@ -88,10 +88,11 @@
                         <option value="<?php print $item['id']; ?>"><?php print $item['subject']; ?> (<?php print implode(',', $item['list_names']); ?>)</option>
                     <?php } ?>
                 </select>
-                <p>Create available messages by adding draft messages to phplist</p>
+                <p>Create further available messages by adding draft messages to phplist</p>
             </fieldset>
             <fieldset>
-                <label>Enter a delay:</label>
+                <p>Select how long to delay before sending the message to new users added to the message lists</p>
+                <label>Select a delay:</label>
                 <select name="mins" id="mins">
                     <?php for ($i = 5; $i < 60; $i += 5) { ?>
                         <option value="<?php print $i; ?>"><?php print Autoresponder_Util::formatMinutes($i); ?></option>
@@ -109,16 +110,16 @@
                         <option value="<?php print 524160 * $i; ?>"><?php print Autoresponder_Util::formatMinutes(524160 * $i); ?></option>
                     <?php } ?>
                 </select>
-                <p>Select how long to delay before sending the message to new users added to the message lists</p>
+                <label>Or enter another value (e.g. 16 days):</label>
+                <input type="text" name="delay" size="20" value="" />
             </fieldset>
             <fieldset>
                 <input type="checkbox" name="new" checked="checked" value="new"><span>Only send to new users (keep checked unless you know what you are doing!)</span>
             </fieldset>
-            <br />
-            <div style="width: 100%; text-align: right">
-                <a href="http://brightflock.com/phplist-autoresponder">Autoresponder plugin sponsored by Brightflock</a>
-            </div>
             <input type="submit" value="Add New Autoresponder">
         </form>
+        <div style="width: 100%; text-align: right">
+            <a href="http://brightflock.com/phplist-autoresponder">Autoresponder plugin sponsored by Brightflock</a>
+        </div>
     </div>
 </div>
