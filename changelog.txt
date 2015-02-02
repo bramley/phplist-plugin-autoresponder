@@ -1,3 +1,11 @@
+version 2015-02-02
+      Revised explanation of cron jobs
+      Delay value can be entered directly
+      Add prompt on message and delay select lists
+      Display all input errors instead of only the first
+      Make 'process' a separate page
+      Use phplist panels
+
 version 2013-12-12
     Check for listid of 0 to work-around bug in phplist, Mantis 16940
 

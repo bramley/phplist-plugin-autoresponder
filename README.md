@@ -74,6 +74,7 @@ The phplist process queue command still needs to be run in order to actually sen
 ## Version history ##
 
     version     Description
+    2015-02-02  Allow delay value to be entered directly, "process" now a separate page
     2013-12-12  Workaround for phplist bug - Mantis 16940
     2013-11-05  Removed key processing, added command line support
     2013-11-01  Added to GitHub
