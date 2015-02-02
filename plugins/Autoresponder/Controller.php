@@ -39,24 +39,22 @@ class Autoresponder_Controller
         if (empty($_GET['mid'])) {
             return 'A message must be selected';
         }
-        $mid = $_GET['mid'];
 
         if (!empty($_GET['delay'])) {
             $delay = trim($_GET['delay']);
 
             if (preg_match('/^\d+\s+(minute|hour|day|week|year)s?$/', $delay)) {
-                $mins = $this->minutes($delay);
+                $delayMinutes = $this->minutes($delay);
             } else {
                 return "Invalid delay value";
             }
-        } elseif (isset($_GET['mins'])) {
-            $mins = $_GET['mins'];
+        } elseif (!empty($_GET['mins'])) {
+            $delayMinutes = $_GET['mins'];
         } else {
-            return "Select or enter delay";
+            return "Select or enter delay value";
         }
 
-        $new = isset($_GET['new']) ? 1 : 0;
-        return $this->model->addAutoresponder($mid, $mins, $new)
+        return $this->model->addAutoresponder($_GET['mid'], $delayMinutes, empty($_GET['new']) ? 0 : 1)
             ? true : 'Was unable to add autoresponder';
     }
 

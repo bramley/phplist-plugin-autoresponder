@@ -84,6 +84,7 @@
             <fieldset>
                 <label>Select the draft message to send:</label>
                 <select name="mid" id="mid">
+                    <option value="0">Select ...</option>
                     <?php foreach ($possible as $item) { ?>
                         <option value="<?php print $item['id']; ?>"><?php print $item['subject']; ?> (<?php print implode(',', $item['list_names']); ?>)</option>
                     <?php } ?>
@@ -94,6 +95,7 @@
                 <p>Select how long to delay before sending the message to new users added to the message lists</p>
                 <label>Select a delay:</label>
                 <select name="mins" id="mins">
+                        <option value="0">Select ...</option>
                     <?php for ($i = 5; $i < 60; $i += 5) { ?>
                         <option value="<?php print $i; ?>"><?php print Autoresponder_Util::formatMinutes($i); ?></option>
                     <?php } ?>
