@@ -28,11 +28,18 @@ class Autoresponder extends phplistPlugin
     public $description = 'Provides an autoresponder';
     public $commandlinePluginPages = array('process');
     public $topMenuLinks = array(
-        'main' => array('category' => 'campaigns')
+        'main' => array('category' => 'campaigns'),
+        'process' => array('category' => 'campaigns')
     );
     public $pageTitles = array(
-        'main' => 'Autoresponder'
+        'main' => 'Manage autoresponders',
+        'process' => 'Process autoresponders'
     );
+
+    public function adminmenu()
+    {
+        return $this->pageTitles;
+    }
 
     public function __construct()
     {

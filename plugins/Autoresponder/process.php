@@ -25,6 +25,7 @@
  */
 if ($GLOBALS["commandline"]) {
     ob_end_clean();
+    print ClineSignature();
     ob_start();
 }
 

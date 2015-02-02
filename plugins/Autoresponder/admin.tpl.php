@@ -65,15 +65,6 @@
             <em>None added yet--add below</em>
         <?php } ?>
     </div>
-    <div class="ar-admin-process">
-        <h1>Process Autoresponders</h1>
-        <hr />
-        <form id="ar-admin-process-form" action="<?php print $process; ?>" method="post">
-            <p>Click the button below to manually call the process script. See the installation instructions on how to automate in cron.</p>
-            <p>Last ran: <em><?php print $last_process ? $last_process : 'never'; ?></em></p>
-            <input type="submit" value="Process Autoresponders">
-        </form>
-    </div>
     <div class="ar-admin-new">
         <h1>Add New Autoresponder</h1>
         <hr />
