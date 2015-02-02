@@ -43,29 +43,6 @@ class AutoResponder_Util
 
     }
 
-    public static function formatMinutes1($mins) {
-        if ($mins < 60) {
-            return $mins . ' minute' . ($mins <> 1 ? 's' : '');
-        }
-
-        if ($mins < 1440) {
-            $hours = $mins / 60;
-            return $hours . ' hour' . ($hours <> 1 ? 's' : '');
-        }
-
-        if ($mins < 10080) {
-            $days = $mins / 60 / 24;
-            return $days . ' day' . ($days <> 1 ? 's' : '');
-        }
-
-        if ($mins < 524160) {
-            $weeks = $mins / 60 / 24 / 7;
-            return $weeks . ' week' . ($weeks <> 1 ? 's' : '');
-        }
-        $years = $mins / 60 / 24 / 7 / 52;
-        return $years . ' year' . ($years <> 1 ? 's' : '');
-    }
-
     public static function pluginRoot($name)
     {
         global $plugins;
