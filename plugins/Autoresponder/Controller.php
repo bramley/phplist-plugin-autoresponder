@@ -36,8 +36,10 @@ class Autoresponder_Controller
     }
 
     public function addRequest() {
+        $errors = array();
+
         if (empty($_GET['mid'])) {
-            return 'A message must be selected';
+            $errors[] = 'A message must be selected';
         }
 
         if (!empty($_GET['delay'])) {
@@ -46,16 +48,19 @@ class Autoresponder_Controller
             if (preg_match('/^\d+\s+(minute|hour|day|week|year)s?$/', $delay)) {
                 $delayMinutes = $this->minutes($delay);
             } else {
-                return "Invalid delay value";
+                $errors[] = "Invalid delay value '$delay'";
             }
         } elseif (!empty($_GET['mins'])) {
             $delayMinutes = $_GET['mins'];
         } else {
-            return "Select or enter delay value";
+            $errors[] = 'Select or enter delay value';
         }
 
+        if ($errors) {
+            return $errors;
+        }
         return $this->model->addAutoresponder($_GET['mid'], $delayMinutes, empty($_GET['new']) ? 0 : 1)
-            ? true : 'Was unable to add autoresponder';
+            ? true : array('Was unable to add autoresponder');
     }
 
     public function deleteRequest() {

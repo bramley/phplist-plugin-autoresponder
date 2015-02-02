@@ -39,7 +39,7 @@ else if (isset($_GET['add']) && $_GET['add']) {
         AutoResponder_Util::pluginRedirect();
     }
 
-    $errorMessages[] = $r;
+    $errorMessages += $r;
 }
 else if (isset($_GET['delete']) && $_GET['delete']) {
     if ($controller->deleteRequest()) {
