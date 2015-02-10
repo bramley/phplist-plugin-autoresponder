@@ -119,12 +119,23 @@ class Autoresponder_Model {
                     Sql_Query("REPLACE INTO " . $tables['user_attribute'] . " " . $qs[1]);
 
                     Sql_Query(
-                        sprintf("UPDATE " . $tables['message'] . " SET status = 'submitted' WHERE (status = 'sent' OR status = 'draft') AND id = %d", $ar['mid']));
+                        sprintf(
+                            "UPDATE {$tables['message']}
+                            SET status = 'submitted'
+                            WHERE (status = 'sent' OR status = 'draft') AND id = %d",
+                            $ar['mid']
+                        )
+                    );
                     $messagesSubmitted[] = $ar['mid'];
                 }
                 else {
                     Sql_Query(
-                        sprintf("UPDATE " . $tables['message'] . " SET status = 'draft' WHERE status = 'sent' AND id = %d", $ar['mid']));
+                        sprintf(
+                            "UPDATE {$tables['message']}
+                            SET status = 'draft' WHERE status = 'sent' AND id = %d",
+                            $ar['mid']
+                        )
+                    );
                 }
 
                 Sql_Query('COMMIT');
@@ -215,17 +226,28 @@ class Autoresponder_Model {
 
             $row = Sql_Fetch_Array($res);
 
-            Sql_Query("INSERT INTO " . $tables['attribute'] . " (name, type, listorder, default_value, required, tablename) VALUES (" .
-                "'autoresponder_" . $row['id'] . "', 'hidden', 0, '', 0, 'autoresponder_" . $row['id'] . "')");
+            Sql_Query(
+                "INSERT INTO {$tables['attribute']}
+                (name, type, listorder, default_value, required, tablename)
+                VALUES ('autoresponder_{$row['id']}', 'hidden', 0, '', 0, 'autoresponder_{$row['id']}')"
+            );
 
             $attribute = $this->getAttribute($row['id']);
 
-            $selectionQuery = sprintf("SELECT ua.userid FROM " . $tables['user_attribute'] . " ua " .
-                "LEFT JOIN " . $tables['usermessage'] . " um ON ua.userid = um.userid AND um.messageid = %d " .
-                "WHERE ua.attributeid = " . $attribute['id'] . " AND ua.value != \"\" AND ua.value IS NOT NULL AND um.userid IS NULL", $mid);
+            $selectionQuery = 
+                "SELECT ua.userid
+                FROM {$tables['user_attribute']} ua
+                LEFT JOIN {$tables['usermessage']} um ON ua.userid = um.userid AND um.messageid = $mid
+                WHERE ua.attributeid = {$attribute['id']} AND ua.value != '' AND ua.value IS NOT NULL AND um.userid IS NULL";
 
             Sql_Query(
-                sprintf("UPDATE " . $tables['message'] . " SET userselection = '%s' WHERE id = %d", $selectionQuery, $mid));
+                sprintf(
+                    "UPDATE {$tables['message']}
+                    SET userselection = '%s' WHERE id = %d",
+                    sql_escape($selectionQuery),
+                    $mid
+                )
+            );
 
             Sql_Query('COMMIT');
         }
