@@ -30,12 +30,14 @@ class Autoresponder_Controller
         return (strtotime($delay, $now) - $now) / 60;
     }
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->model = new Autoresponder_Model();
         $this->root = AutoResponder_Util::pluginRoot('Autoresponder');
     }
 
-    public function addRequest() {
+    public function addRequest()
+    {
         $errors = array();
 
         if (empty($_GET['mid'])) {
@@ -63,7 +65,8 @@ class Autoresponder_Controller
             ? true : array('Was unable to add autoresponder');
     }
 
-    public function deleteRequest() {
+    public function deleteRequest()
+    {
         $id = isset($_GET['id']) ? intval($_GET['id']) : null;
 
         if (!$id) {
@@ -73,7 +76,8 @@ class Autoresponder_Controller
         return $this->model->deleteAutoresponder($id);
     }
 
-    public function toggleEnabledRequest() {
+    public function toggleEnabledRequest()
+    {
         $id = isset($_GET['id']) ? intval($_GET['id']) : null;
 
         if (!$id) {
@@ -83,13 +87,24 @@ class Autoresponder_Controller
         return $this->model->toggleEnabled($id);
     }
 
-    public function process() {
+    public function process()
+    {
+        global $plugins;
+
         $this->model->setLastProcess();
 
-        return $this->model->setPending();
+        $messageIds = $this->model->setPending();
+
+        foreach ($messageIds as $mid) {
+            foreach ($plugins as $plugin) {
+                $plugin->messageReQueued($mid);
+            }
+        }
+        return count($messageIds);
     }
 
-    public function adminView($params) {
+    public function adminView($params)
+    {
         $vars = array(
             'params' => $params,
             'current' => $this->model->getAutoresponders(),
@@ -101,7 +116,8 @@ class Autoresponder_Controller
         return $this->view('admin', $vars);
     }
 
-    private function view($name, $vars = array()) {
+    private function view($name, $vars = array())
+    {
         if (!is_file($this->root . $name . '.tpl.php')) {
             return null;
         }

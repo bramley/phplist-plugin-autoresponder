@@ -146,7 +146,7 @@ class Autoresponder_Model {
             }
         }
 
-        return count($messagesSubmitted);
+        return $messagesSubmitted;
     }
 
     public function getListNames() {

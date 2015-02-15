@@ -1,3 +1,7 @@
+version 2015-02-15
+      Cosmetic change to layout of queries
+      When a campaign is requeued call plugins messageReQueued() method
+
 version 2015-02-02
       Revised explanation of cron jobs
       Delay value can be entered directly
