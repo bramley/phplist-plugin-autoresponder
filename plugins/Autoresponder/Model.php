@@ -18,8 +18,49 @@
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
  * @link      http://brightflock.com
  */
-class Autoresponder_Model {
+class Autoresponder_Model
+{
     private static $TABLE = 'autoresponders';
+
+    /**
+     * Create the database table
+     * Upgrade the table by adding the addlistid column
+     *
+     * @access  private
+     * @return  none
+     */
+    private static function init() {
+        global $tables;
+        global $table_prefix;
+
+        $table = $table_prefix . self::$TABLE;
+
+        if (!Sql_Table_exists($table)) {
+            $r = Sql_Query(
+                "CREATE TABLE $table (
+                    id INT(11) NOT NULL AUTO_INCREMENT,
+                    enabled BOOL NOT NULL,
+                    mid INT(11) NOT NULL,
+                    mins INT(11) NOT NULL,
+                    addlistid INT(11) NOT NULL,
+                    new BOOL NOT NULL,
+                    entered DATETIME NOT NULL,
+                    PRIMARY KEY(id)
+                )"
+            );
+        }
+
+        $r = Sql_Query("SHOW COLUMNS FROM `$table` LIKE 'addlistid'");
+
+        if (!(bool)Sql_Num_Rows($r)) {
+            $sql = <<<END
+                ALTER TABLE $table
+                ADD COLUMN addlistid INT(11) AFTER mins
+END;
+            Sql_Query($sql);
+            logEvent('Autoresponder plugin table upgraded');
+        }
+    }
 
     public function __construct() {
         self::init();
@@ -188,12 +229,17 @@ class Autoresponder_Model {
             $listNames = $this->getListNames();
 
             while (($row = Sql_Fetch_Array($res))) {
+                // convert list ids to list names
                 $row['list_ids'] = explode(',', $row['list_ids']);
                 $row['list_names'] = array();
 
                 foreach ($row['list_ids'] as $id) {
                     $row['list_names'][$id] = isset($listNames[$id]) ? $listNames[$id] : 'Unknown';
                 }
+
+                // include name of list to add to
+                $addListId = $row['addlistid'];
+                $row['addlist'] = isset($listNames[$addListId]) ? $listNames[$addListId] : '';
 
                 $responders[$row['id']] = $row;
             }
@@ -204,7 +250,7 @@ class Autoresponder_Model {
         return $responders;
     }
 
-    public function addAutoresponder($mid, $mins, $new = 1) {
+    public function addAutoresponder($mid, $mins, $addListId, $new = 1) {
         global $tables;
         global $table_prefix;
 
@@ -216,8 +262,8 @@ class Autoresponder_Model {
             Sql_Query(
                 sprintf(
                     "INSERT INTO `$table`
-                    (enabled, mid, mins, new, entered)
-                    VALUES (1, %d, %d, %d, now())", $mid, $mins, $new
+                    (enabled, mid, mins, addlistid, new, entered)
+                    VALUES (1, %d, %d, %d, %d, now())", $mid, $mins, $addListId, $new
                 )
             );
 
@@ -310,47 +356,60 @@ class Autoresponder_Model {
         return Sql_Fetch_Array($res);
     }
 
-    private static function init() {
+    /**
+     * Return the autoresponder, if there is one, for a message
+     *
+     * @access  public
+     * @param   int  $messageId the message id
+     * @return  array the fields for the autoresponder
+     *          or false if there is no autoresponder for the message
+     */
+    public function getAutoresponderForMessage($messageId)
+    {
         global $tables;
         global $table_prefix;
 
         $table = $table_prefix . self::$TABLE;
+        $row = Sql_Fetch_Assoc(
+            Sql_Query(<<<END
+                SELECT id, addlistid
+                FROM $table a
+                WHERE a.mid = $messageId
+END
+            )
+        );
 
-        if (!Sql_Table_exists($table)) {
-            $r = Sql_Query(
-                "CREATE TABLE $table (
-                    id INT(11) NOT NULL AUTO_INCREMENT,
-                    enabled BOOL NOT NULL,
-                    mid INT(11) NOT NULL,
-                    mins INT(11) NOT NULL,
-                    new BOOL NOT NULL,
-                    entered DATETIME NOT NULL,
-                    PRIMARY KEY(id)
-                )"
-            );
-        }
+        return $row;
     }
+
+    /**
+     * Add a subscriber to a list
+     *
+     * @access  public
+     * @param   int  $listId the list id
+     * @param   int  $userId the user id
+     * @return  int  the number of rows added, 0 or 1
+     */
+    public function addSubscriberToList($listId, $userId)
+    {
+        global $tables;
+        global $table_prefix;
+
+        $res = Sql_Query(<<<END
+            INSERT IGNORE INTO $tables[listuser]
+            (addlistid, userid, entered)
+            VALUES ($listId, $userId, now())
+END
+        );
+        return Sql_Affected_Rows();
+    }
+
 }
 
 function autoresponder_sort($a, $b) {
     $aname = reset($a['list_names']);
     $bname = reset($b['list_names']);
+    $r = strcmp($aname, $bname);
 
-    if ($aname < $bname) {
-        return -1;
-    }
-
-    if ($aname > $bname) {
-        return 1;
-    }
-
-    if ($a['mins'] < $b['mins']) {
-        return -1;
-    }
-
-    if ($a['mins'] > $b['mins']) {
-        return 1;
-    }
-
-    return 0;
+    return ($r == 0) ? $a['mins'] - $b['mins'] : $r;
 }

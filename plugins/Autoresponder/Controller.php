@@ -61,7 +61,8 @@ class Autoresponder_Controller
         if ($errors) {
             return $errors;
         }
-        return $this->model->addAutoresponder($_GET['mid'], $delayMinutes, empty($_GET['new']) ? 0 : 1)
+        $addListId = $_GET['addlist'] ? $_GET['addlist'] : 0;
+        return $this->model->addAutoresponder($_GET['mid'], $delayMinutes, $addListId, empty($_GET['new']) ? 0 : 1)
             ? true : array('Was unable to add autoresponder');
     }
 
@@ -109,6 +110,12 @@ class Autoresponder_Controller
             'params' => $params,
             'current' => $this->model->getAutoresponders(),
             'possible' => $this->model->getPossibleMessages(),
+            'lists' => CHtml::dropDownList(
+                'addlist',
+                '',
+                $this->model->getListNames(),
+                array('prompt' => 'Select ...')
+            ),
             'last_process' => $this->model->getLastProcess(),
             'process' => AutoResponder_Util::pluginURL('process', array('pi' => 'Autoresponder'))
         );

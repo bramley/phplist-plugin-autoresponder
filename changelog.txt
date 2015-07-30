@@ -1,3 +1,6 @@
+version 2015-07-30
+      Add subscriber to a list when the campaign has been sent
+
 version 2015-02-15
       Cosmetic change to layout of queries
       When a campaign is requeued call plugins messageReQueued() method

@@ -18,7 +18,12 @@ The plugin adds an item to the Campaigns menu.
 
 Requires php version 5.2 or later.
 
+Requires the Common Plugin to be installed. You must install the plugin or upgrade to the latest version if it is already installed.
+See <https://github.com/bramley/phplist-plugin-common>
+
 ### Set the plugin directory ###
+The default plugin directory is `plugins` within the admin directory.
+
 You can use a directory outside of the web root by changing the definition of `PLUGIN_ROOTDIR` in config.php.
 The benefit of this is that plugins will not be affected when you upgrade phplist.
 
@@ -74,6 +79,7 @@ The phplist process queue command still needs to be run in order to actually sen
 ## Version history ##
 
     version     Description
+    2015-07-30  Added action to add subscribers to another list when campaign has been sent
     2015-02-15  Inform plugins when a campaign is requeued
     2015-02-02  Allow delay value to be entered directly, "process" now a separate page
     2013-12-12  Workaround for phplist bug - Mantis 16940

@@ -46,6 +46,7 @@
                                 <td><div class="listinghdelement">Delay</div></td>
                                 <td><div class="listinghdelement">Added</div></td>
                                 <td><div class="listinghdelement">Subject</div></td>
+                                <td><div class="listinghdelement">Add to list</div></td>
                                 <td><div class="listinghdelement">New Only</div></td>
                                 <td><div class="listinghdelement">Enabled</div></td>
                                 <td><div class="listinghdelement">Delete</div></td>
@@ -57,6 +58,7 @@
                                     <td class="listingelement"><?php print Autoresponder_Util::formatMinutes($item['mins']); ?></td>
                                     <td class="listingelement"><?php print $item['entered']; ?></td>
                                     <td class="listingelement"><?php print $item['subject']; ?></td>
+                                    <td class="listingelement"><?php print $item['addlist']; ?></td>
                                     <td class="listingelement"><?php print $item['new'] ? 'yes' : 'no'; ?></td>
                                     <td class="listingelement"><a href="<?php print Autoresponder_Util::pluginURL(null, array('toggleEnabled' => 1, 'id' => $item['id'])); ?>"><?php print ($item['enabled'] ? 'yes' : 'no'); ?></a></td>
                                     <td class="listingelement"><a href="<?php print Autoresponder_Util::pluginURL(null, array('delete' => 1, 'id' => $item['id'])); ?>">delete</a></td>
@@ -80,7 +82,6 @@
                     <input type="hidden" name="page" value="<?php print $_GET['page']; ?>">
                     <input type="hidden" name="pi" value="<?php print $_GET['pi']; ?>">
                     <input type="hidden" name="add" value="1">
-                    <fieldset>
                         <label>Select the draft message to send:</label>
                         <select name="mid" id="mid">
                             <option value="0">Select ...</option>
@@ -89,10 +90,8 @@
                             <?php } ?>
                         </select>
                         <p>Create further available messages by adding draft messages to phplist</p>
-                    </fieldset>
-                    <fieldset>
-                        <p>Select how long to delay before sending the message to new users added to the message lists</p>
                         <label>Select a delay:</label>
+                        <p>Select how long to delay before sending the message to new users added to the message lists</p>
                         <select name="mins" id="mins">
                                 <option value="0">Select ...</option>
                             <?php for ($i = 5; $i < 60; $i += 5) { ?>
@@ -113,7 +112,9 @@
                         </select>
                         <label>Or enter another value (e.g. 16 days):</label>
                         <input type="text" name="delay" size="20" value="" />
-                    </fieldset>
+                        <label>Actions:</label>
+                        <p>Add each subscriber to another list when the autoresponder has been sent</p>
+                        <?php echo $lists; ?>
                     <fieldset>
                         <input type="checkbox" name="new" checked="checked" value="new"><span>Only send to new users (keep checked unless you know what you are doing!)</span>
                     </fieldset>

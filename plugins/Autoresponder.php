@@ -35,11 +35,7 @@ class Autoresponder extends phplistPlugin
         'main' => 'Manage autoresponders',
         'process' => 'Process autoresponders'
     );
-
-    public function adminmenu()
-    {
-        return $this->pageTitles;
-    }
+    public $documentationUrl = 'https://resources.phplist.com/plugin/autoresponder_3.x';
 
     public function __construct()
     {
@@ -48,5 +44,61 @@ class Autoresponder extends phplistPlugin
             ? file_get_contents($f)
             : '';
         parent::__construct();
+    }
+
+    public function adminmenu()
+    {
+        return $this->pageTitles;
+    }
+
+    public function dependencyCheck()
+    {
+        global $plugins;
+
+        return array(
+            'Common plugin installed' =>
+                phpListPlugin::isEnabled('CommonPlugin') && 
+                (strpos($plugins['CommonPlugin']->version, 'Git') === 0 || $plugins['CommonPlugin']->version >= '2015-03-23'),
+            'PHP version 5.3.0 or greater' => version_compare(PHP_VERSION, '5.3') > 0,
+        );
+    }
+
+    /**
+     * Hook for when a message has been sent to a user
+     * If the message is an autoresponder and a list has been specified then
+     * add the user to that list
+     *
+     * @access  public
+     * @param   int  $messageId the message id
+     * @param   array  $userdata array of user data
+     * @param   bool  $isTestMail whether sending a test email
+     * @return  none
+     */
+    public function processSendSuccess($messageId, $userdata, $isTestMail)
+    {
+        if ($isTestMail) {
+            return;
+        }
+        $model = new Autoresponder_Model;
+
+        if (!($ar = $model->getAutoresponderForMessage($messageId))) {
+            return;
+        }
+
+        $listId = $ar['addlistid'];
+        $autoId = $ar['id'];
+
+        if ($listId == 0) {
+            return;
+        }
+        
+        if ($model->addSubscriberToList($listId, $userdata['id'])) {
+            addUserHistory(
+                $userdata['email'],
+                "Added to list automatically",
+                "Added to list $listId by autoresponder $autoId, message $messageId"
+            );
+        }
+
     }
 }
