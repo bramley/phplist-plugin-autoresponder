@@ -29,15 +29,11 @@ class Autoresponder_Model
      * @access  private
      * @return  none
      */
-    private static function init() {
-        global $tables;
-        global $table_prefix;
-
-        $table = $table_prefix . self::$TABLE;
-
-        if (!Sql_Table_exists($table)) {
+    private function init()
+    {
+        if (!Sql_Table_exists($this->tables['autoresponders'])) {
             $r = Sql_Query(
-                "CREATE TABLE $table (
+                "CREATE TABLE {$this->tables['autoresponders']} (
                     id INT(11) NOT NULL AUTO_INCREMENT,
                     enabled BOOL NOT NULL,
                     mid INT(11) NOT NULL,
@@ -50,11 +46,11 @@ class Autoresponder_Model
             );
         }
 
-        $r = Sql_Query("SHOW COLUMNS FROM `$table` LIKE 'addlistid'");
+        $r = Sql_Query("SHOW COLUMNS FROM {$this->tables['autoresponders']} LIKE 'addlistid'");
 
         if (!(bool)Sql_Num_Rows($r)) {
             $sql = <<<END
-                ALTER TABLE $table
+                ALTER TABLE {$this->tables['autoresponders']}
                 ADD COLUMN addlistid INT(11) AFTER mins
 END;
             Sql_Query($sql);
@@ -62,19 +58,46 @@ END;
         }
     }
 
-    public function __construct() {
-        self::init();
+    private function getAttribute($id)
+    {
+        $res = Sql_Query(
+            "SELECT * FROM {$this->tables['attribute']}
+            WHERE name = 'autoresponder_$id'"
+        );
+        return Sql_Fetch_Array($res);
     }
 
-    public function getPossibleMessages() {
-        global $table_prefix;
+    /*
+     *  Public methods
+     */
+    public function __construct()
+    {
         global $tables;
+        global $table_prefix;
 
-        $res = Sql_Query("SELECT GROUP_CONCAT(DISTINCT lm.listid SEPARATOR ',') AS list_ids, m.id, m.subject FROM " . $tables['message'] . " m " .
-            "INNER JOIN " . $tables['listmessage'] . " lm ON m.id = lm.messageid " .
-            "LEFT JOIN " . $table_prefix . self::$TABLE . " ar ON m.id = ar.mid " .
-            "WHERE status = 'draft' AND ar.id IS NULL AND lm.listid != 0 " .
-            "GROUP BY m.id");
+        $this->tables = $tables + array('autoresponders' => $table_prefix . 'autoresponders');
+        $this->init();
+    }
+
+    /**
+     * Gets available draft messages
+     * Includes an additional specific message, for use when editing an autoresponder.
+     * @param int $mid additional message to include in the results
+     * @return array associative array indexed by message id
+     * @access public
+     */
+    public function getPossibleMessages($mid)
+    {
+        $or = $mid ? "OR m.id = $mid" : '';
+        $res = Sql_Query(
+            "SELECT GROUP_CONCAT(DISTINCT lm.listid SEPARATOR ',') AS list_ids, m.id, m.subject
+            FROM {$this->tables['message']} m
+            INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
+            LEFT JOIN {$this->tables['autoresponders']} ar ON m.id = ar.mid
+            WHERE (status = 'draft' AND ar.id IS NULL AND lm.listid != 0)
+            $or
+            GROUP BY m.id"
+        );
 
         $messages = array();
         $listNames = $this->getListNames();
@@ -93,29 +116,35 @@ END;
         return $messages;
     }
 
-    public function toggleEnabled($id) {
-        global $table_prefix;
-
+    public function toggleEnabled($id)
+    {
         Sql_Query(
-            sprintf("UPDATE " . $table_prefix . self::$TABLE . " SET enabled = !enabled WHERE id = %d", $id));
+            "UPDATE {$this->tables['autoresponders']}
+            SET enabled = !enabled
+            WHERE id = $id"
+        );
 
         return true;
     }
 
-    public function setLastProcess() {
+    public function setLastProcess()
+    {
         global $tables;
 
-        Sql_Query("REPLACE INTO " . $tables['config'] . " (item, value, editable) values('autoresponder_last_process', now(), 0)");
+        Sql_Query(
+            "REPLACE INTO {$this->tables['config']}
+            (item, value, editable)
+            VALUES ('autoresponder_last_process', now(), 0)"
+        );
     }
 
-    public function getLastProcess() {
+    public function getLastProcess()
+    {
         return getConfig('autoresponder_last_process');
     }
 
-    public function setPending() {
-        global $table_prefix;
-        global $tables;
-
+    public function setPending()
+    {
         $ars = $this->getAutoresponders();
         $messagesSubmitted = array();
 
@@ -123,21 +152,21 @@ END;
             if (!$ar['enabled']) {
                 continue;
             }
-
             $attribute = $this->getAttribute($ar['id']);
-
             $qs = array();
-            $table = $table_prefix . self::$TABLE;
-
-            foreach (array('COUNT(*)', $attribute['id'] . ' AS attributeid, lu.userid AS userid, now() AS value') as $select) {
-                $q = "
-                    SELECT $select
-                    FROM $table ar
-                        INNER JOIN {$tables['message']} m ON ar.mid = m.id
-                        INNER JOIN {$tables['listmessage']} lm ON m.id = lm.messageid
-                        INNER JOIN {$tables['listuser']} lu ON lm.listid = lu.listid
-                        INNER JOIN {$tables['user']} u ON u.id = lu.userid AND u.confirmed = 1 AND u.blacklisted = 0
-                        LEFT JOIN {$tables['usermessage']} um ON lu.userid = um.userid AND um.messageid = m.id
+        
+            foreach (
+                array(
+                    'COUNT(*)',
+                    $attribute['id'] . ' AS attributeid, lu.userid AS userid, now() AS value'
+                ) as $select) {
+                $q = "SELECT $select
+                    FROM {$this->tables['autoresponders']} ar
+                        INNER JOIN {$this->tables['message']} m ON ar.mid = m.id
+                        INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
+                        INNER JOIN {$this->tables['listuser']} lu ON lm.listid = lu.listid
+                        INNER JOIN {$this->tables['user']} u ON u.id = lu.userid AND u.confirmed = 1 AND u.blacklisted = 0
+                        LEFT JOIN {$this->tables['usermessage']} um ON lu.userid = um.userid AND um.messageid = m.id
                         WHERE ar.id = {$ar['id']}";
 
                 if ($ar['new']) {
@@ -157,11 +186,11 @@ END;
                 Sql_Query('BEGIN');
 
                 if ($row[0]) {
-                    Sql_Query("REPLACE INTO " . $tables['user_attribute'] . " " . $qs[1]);
+                    Sql_Query("REPLACE INTO {$this->tables['user_attribute']} " . $qs[1]);
 
                     Sql_Query(
                         sprintf(
-                            "UPDATE {$tables['message']}
+                            "UPDATE {$this->tables['message']}
                             SET status = 'submitted'
                             WHERE (status = 'sent' OR status = 'draft') AND id = %d",
                             $ar['mid']
@@ -171,11 +200,9 @@ END;
                 }
                 else {
                     Sql_Query(
-                        sprintf(
-                            "UPDATE {$tables['message']}
-                            SET status = 'draft' WHERE status = 'sent' AND id = %d",
-                            $ar['mid']
-                        )
+                        "UPDATE {$this->tables['message']}
+                        SET status = 'draft'
+                        WHERE status = 'sent' AND id = {$ar['mid']}"
                     );
                 }
 
@@ -186,42 +213,46 @@ END;
                 return false;
             }
         }
-
         return $messagesSubmitted;
     }
 
-    public function getListNames() {
+    public function getListNames()
+    {
         static $names = null;
 
         if ($names === null) {
             $names = array();
 
-            global $tables;
-            $res = Sql_Query("SELECT id, name FROM " . $tables['list']);
+            $res = Sql_Query("SELECT id, name FROM {$this->tables['list']}");
 
             while (($row = Sql_Fetch_Array($res))) {
                 $names[$row['id']] = $row['name'];
             }
         }
-
         return $names;
     }
 
-    public function getAutoresponders() {
+    public function autoresponder($id)
+    {
+        $res = Sql_Query(
+            "SELECT ar.*
+            FROM {$this->tables['autoresponders']} ar
+            WHERE ar.id = $id"
+        );
+        return Sql_Fetch_Array($res);
+    }
+
+    public function getAutoresponders()
+    {
         static $responders = null;
 
         if ($responders === null) {
             $responders = array();
-
-            global $tables;
-            global $table_prefix;
-
-            $table = $table_prefix . self::$TABLE;
             $res = Sql_Query("
                 SELECT ar.*, m.subject, GROUP_CONCAT(DISTINCT lm.listid SEPARATOR ',') AS list_ids
-                FROM $table ar
-                INNER JOIN {$tables['message']} m ON ar.mid = m.id
-                INNER JOIN {$tables['listmessage']} lm ON m.id = lm.messageid
+                FROM {$this->tables['autoresponders']} ar
+                INNER JOIN {$this->tables['message']} m ON ar.mid = m.id
+                INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
                 WHERE lm.listid != 0
                 GROUP BY ar.id
             ");
@@ -244,36 +275,37 @@ END;
                 $responders[$row['id']] = $row;
             }
 
-            uasort($responders, 'autoresponder_sort');
+            uasort(
+                $responders,
+                function ($a, $b) {
+                    $aname = reset($a['list_names']);
+                    $bname = reset($b['list_names']);
+                    $r = strcmp($aname, $bname);
+                    return ($r == 0) ? $a['mins'] - $b['mins'] : $r;
+                }
+             );
         }
-
         return $responders;
     }
 
-    public function addAutoresponder($mid, $mins, $addListId, $new = 1) {
-        global $tables;
-        global $table_prefix;
-
+    public function addAutoresponder($mid, $mins, $addListId, $new = 1)
+    {
         try {
-            $table = $table_prefix . self::$TABLE;
-
             Sql_Query('BEGIN');
 
             Sql_Query(
-                sprintf(
-                    "INSERT INTO `$table`
-                    (enabled, mid, mins, addlistid, new, entered)
-                    VALUES (1, %d, %d, %d, %d, now())", $mid, $mins, $addListId, $new
-                )
+                "INSERT INTO {$this->tables['autoresponders']}
+                (enabled, mid, mins, addlistid, new, entered)
+                VALUES (1, $mid, $mins, $addListId, $new, now())"
             );
 
             $res = Sql_Query(
-                sprintf("SELECT id FROM " . $table_prefix . self::$TABLE . " WHERE mid = %d", $mid));
+                sprintf("SELECT id FROM {$this->tables['autoresponders']} WHERE mid = %d", $mid));
 
             $row = Sql_Fetch_Array($res);
 
             Sql_Query(
-                "INSERT INTO {$tables['attribute']}
+                "INSERT INTO {$this->tables['attribute']}
                 (name, type, listorder, default_value, required, tablename)
                 VALUES ('autoresponder_{$row['id']}', 'hidden', 0, '', 0, 'autoresponder_{$row['id']}')"
             );
@@ -282,13 +314,13 @@ END;
 
             $selectionQuery = 
                 "SELECT ua.userid
-                FROM {$tables['user_attribute']} ua
-                LEFT JOIN {$tables['usermessage']} um ON ua.userid = um.userid AND um.messageid = $mid
+                FROM {$this->tables['user_attribute']} ua
+                LEFT JOIN {$this->tables['usermessage']} um ON ua.userid = um.userid AND um.messageid = $mid
                 WHERE ua.attributeid = {$attribute['id']} AND ua.value != '' AND ua.value IS NOT NULL AND um.userid IS NULL";
 
             Sql_Query(
                 sprintf(
-                    "UPDATE {$tables['message']}
+                    "UPDATE {$this->tables['message']}
                     SET userselection = '%s' WHERE id = %d",
                     sql_escape($selectionQuery),
                     $mid
@@ -301,41 +333,61 @@ END;
             Sql_Query('ROLLBACK');
             return false;
         }
-
         return true;
     }
 
-    public function deleteAutoresponder($id) {
-        global $tables;
-        global $table_prefix;
+    public function updateAutoresponder($id, $mins, $addListId, $new)
+    {
+        Sql_Query(
+            "UPDATE {$this->tables['autoresponders']}
+            SET mins = $mins, addlistid = $addListId, new = $new
+            WHERE id = $id"
+        );
+        return true;
+    }
 
+    public function deleteAutoresponder($id)
+    {
         $attribute = $this->getAttribute($id);
 
         try {
             Sql_Query('BEGIN');
 
             $res = Sql_Query(
-                sprintf("SELECT mid FROM " . $table_prefix . self::$TABLE . " WHERE id = %d", $id));
+                "SELECT mid FROM {$this->tables['autoresponders']}
+                WHERE id = $id"
+            );
 
             $row = Sql_Fetch_Array($res);
 
             if ($row && isset($row['mid'])) {
                 Sql_Query(
-                    sprintf("UPDATE " . $tables['message'] . " SET status = 'draft', userselection = NULL WHERE id = %d", $row['mid']));
+                    "UPDATE {$this->tables['message']}
+                    SET status = 'draft', userselection = NULL
+                    WHERE id = {$row['mid']}"
+                );
 
                 Sql_Query(
-                    sprintf("DELETE FROM " . $tables['usermessage'] . " WHERE messageid = %d", $row['mid']));
+                    "DELETE FROM {$this->tables['usermessage']}
+                    WHERE messageid = {$row['mid']}"
+                );
             }
 
             Sql_query(
-                sprintf("DELETE FROM `" . $table_prefix . self::$TABLE . "` WHERE id = %d", $id));
+                "DELETE FROM {$this->tables['autoresponders']}
+                WHERE id = $id"
+            );
 
             if ($attribute) {
                 Sql_query(
-                    sprintf("DELETE FROM " . $tables['attribute'] . " WHERE id = %d", $attribute['id']));
+                    "DELETE FROM {$this->tables['attribute']}
+                    WHERE id = {$attribute['id']}"
+                );
 
                 Sql_query(
-                    sprintf("DELETE FROM " . $tables['user_attribute'] . " WHERE attributeid = %d", $attribute['id']));
+                    "DELETE FROM {$this->tables['user_attribute']}
+                    WHERE attributeid = {$attribute['id']}"
+                );
             }
 
             Sql_Query('COMMIT');
@@ -344,16 +396,7 @@ END;
             Sql_Query('ROLLBACK');
             return false;
         }
-
         return true;
-    }
-
-    public function getAttribute($id) {
-        global $tables;
-
-        $res = Sql_Query("SELECT * FROM " . $tables['attribute'] . " WHERE name = 'autoresponder_" . $id . "'");
-
-        return Sql_Fetch_Array($res);
     }
 
     /**
@@ -366,19 +409,14 @@ END;
      */
     public function getAutoresponderForMessage($messageId)
     {
-        global $tables;
-        global $table_prefix;
-
-        $table = $table_prefix . self::$TABLE;
         $row = Sql_Fetch_Assoc(
             Sql_Query(<<<END
                 SELECT id, addlistid
-                FROM $table a
+                FROM {$this->tables['autoresponders']} a
                 WHERE a.mid = $messageId
 END
             )
         );
-
         return $row;
     }
 
@@ -392,24 +430,12 @@ END
      */
     public function addSubscriberToList($listId, $userId)
     {
-        global $tables;
-        global $table_prefix;
-
         $res = Sql_Query(<<<END
-            INSERT IGNORE INTO $tables[listuser]
+            INSERT IGNORE INTO {$this->tables['listuser']}
             (listid, userid, entered)
             VALUES ($listId, $userId, now())
 END
         );
         return Sql_Affected_Rows();
     }
-
-}
-
-function autoresponder_sort($a, $b) {
-    $aname = reset($a['list_names']);
-    $bname = reset($b['list_names']);
-    $r = strcmp($aname, $bname);
-
-    return ($r == 0) ? $a['mins'] - $b['mins'] : $r;
 }

@@ -28,11 +28,11 @@ class Autoresponder extends phplistPlugin
     public $description = 'Provides an autoresponder';
     public $commandlinePluginPages = array('process');
     public $topMenuLinks = array(
-        'main' => array('category' => 'campaigns'),
+        'manage' => array('category' => 'campaigns'),
         'process' => array('category' => 'campaigns')
     );
     public $pageTitles = array(
-        'main' => 'Manage autoresponders',
+        'manage' => 'Manage autoresponders',
         'process' => 'Process autoresponders'
     );
     public $documentationUrl = 'https://resources.phplist.com/plugin/autoresponder_3.x';
@@ -56,13 +56,25 @@ class Autoresponder extends phplistPlugin
         global $plugins;
 
         return array(
-            'Common plugin installed' =>
-                phpListPlugin::isEnabled('CommonPlugin') && 
-                (strpos($plugins['CommonPlugin']->version, 'Git') === 0 || $plugins['CommonPlugin']->version >= '2015-03-23'),
+            'Common plugin v3 installed' =>
+                phpListPlugin::isEnabled('CommonPlugin')
+                    && 
+                preg_match('/\d+\.\d+\.\d+/', $plugins['CommonPlugin']->version, $matches)
+                    &&
+                version_compare($matches[0], '3') > 0,
             'PHP version 5.3.0 or greater' => version_compare(PHP_VERSION, '5.3') > 0,
         );
     }
 
+    public function cronJobs()
+    {
+        return array(
+            array(
+                'page' => 'process',
+                'frequency' => 60,
+            )
+        );
+    }
     /**
      * Hook for when a message has been sent to a user
      * If the message is an autoresponder and a list has been specified then

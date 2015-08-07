@@ -23,21 +23,4 @@
  * 
  * 
  */
-if ($GLOBALS["commandline"]) {
-    ob_end_clean();
-    print ClineSignature();
-    ob_start();
-}
-
-require_once(dirname(__FILE__) . '/Util.php');
-require_once(dirname(__FILE__) . '/Model.php');
-require_once(dirname(__FILE__) . '/Controller.php');
-
-$controller = new Autoresponder_Controller();
-
-$result = $controller->process();
-echo "$result messages processed";
-
-if ($GLOBALS["commandline"]) {
-    ob_flush();
-}
+CommonPlugin_Main::run(new Autoresponder_ControllerFactory);

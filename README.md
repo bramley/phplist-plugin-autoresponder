@@ -2,21 +2,20 @@
 
 ## Description ##
 
-This plugin allows you to send campaigns to subscribers of a list based on the time elapsed since that subscriber joined the list 
-(a different actual time for each subscriber). For example, to send a newsletter to a subscriber 1 hour after he joined a particular list.
+This plugin allows you to send a campaign to subscribers of a list at a specified period after each subscriber joined the list 
+(sending at a different actual time for each subscriber).
+For example, to send a newsletter to a subscriber 1 day after he joined the list.
 
-This is a conversion of the Autoresponder plugin from phplist 2.10.x to 3.0.x adapted to use the plugin architecture of phplist 3. 
-
-See this topic in the phplist support forum <http://forums.phplist.com/viewtopic.php?f=7&t=38786> 
-for details of how the plugin works.
-
-The plugin adds an item to the Campaigns menu.
+This is a conversion of the Autoresponder plugin from phplist 2.10.x to phplist 3 being adapted to use the plugin architecture of phplist 3,
+and being substantially enhanced.
+The original plugin was developed by Cameron Lerch of Brightflock Inc. <http://brightflock.com/phplist-autoresponder> to whom credit
+is due.
 
 ## Installation ##
 
 ### Dependencies ###
 
-Requires php version 5.2 or later.
+Requires php version 5.3 or later.
 
 Requires the Common Plugin to be installed. You must install the plugin or upgrade to the latest version if it is already installed.
 See <https://github.com/bramley/phplist-plugin-common>
@@ -45,40 +44,14 @@ This should contain
 * the file Autoresponder.php
 * the directory Autoresponder
 
-## Usage ##
+##Usage##
 
-### Create draft messages ###
-
-Add some draft messages to use as Autoresponders. The plugin uses draft messages as the message that are
-sent as an autoresponder. Be sure that you select some lists in your draft message. New members of the lists you selected
-will get the autoresponder message.
-
-### Create an autoresponder ###
-
-On the autoresponder page, create an autoresponder. For each autoresponder created you will get a new user attribute. That
-user attribute will be populated with the date the message was sent to the user. If the attribute is empty, the message has
-not been sent.
-
-### Create a cron job ###
-
-The Process Autoresponders page needs to be run periodically to prepare the messages to be sent. To avoid having to do that manually you
-can create a cron job to access that page at regular intervals. The command will be similar to this for phplist release 3.0.9
-or later, or if you are using php-cli with an earlier release of phplist
-(but adjust for the directory in which phplist is installed)
-
-    php /home/me/www/lists/admin/index.php -m Autoresponder -p process -c /home/me/www/lists/config/config.php
-
-Prior to phplist release 3.0.9, if you are using php-cgi then you will need to include the credentials of a phplist admin
-in the command. The admin should be an ordinary admin with no privileges. For example using php-cgi the command will be similar to
-
-    php /home/me/www/lists/admin/index.php pi=Autoresponder page=process login=yyyy password=zzzz
-    
-The process page selects those messages that now need to be sent and the subscribers to receive the messages.
-The phplist process queue command still needs to be run in order to actually send the messages.
+For guidance on usage see the plugin page within the phplist documentation site <https://resources.phplist.com/plugin/autoresponder_3.x>
 
 ## Version history ##
 
     version         Description
+    2.1.0+20150811  Can now edit an autoresponder, improved layout of listing
     2.0.1+20150807  Fixes bug in not adding subscriber to another list
     2015-07-30      Added action to add subscribers to another list when campaign has been sent
     2015-02-15      Inform plugins when a campaign is requeued

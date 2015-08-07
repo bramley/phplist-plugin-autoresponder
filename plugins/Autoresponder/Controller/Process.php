@@ -18,33 +18,39 @@
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
  * @link      http://brightflock.com
  */
-class Autoresponder_Util
+class Autoresponder_Controller_Process extends CommonPlugin_Controller
 {
-    public static function formatMinutes($mins)
+    private $model;
+
+    public function __construct()
     {
-        if (is_int($years = $mins / 60 / 24 / 7 / 52)) {
-            return $years . ' year' . ($years <> 1 ? 's' : '');
-        }
-
-        if (is_int($weeks = $mins / 60 / 24 / 7)) {
-            return $weeks . ' week' . ($weeks <> 1 ? 's' : '');
-        }
-
-        if (is_int($days = $mins / 60 / 24)) {
-            return $days . ' day' . ($days <> 1 ? 's' : '');
-        }
-
-        if (is_int($hours = $mins / 60)) {
-            return $hours . ' hour' . ($hours <> 1 ? 's' : '');
-        }
-
-        return $mins . ' minute' . ($mins <> 1 ? 's' : '');
-
+        $this->model = new Autoresponder_Model();
     }
 
-    public static function pluginRedirect($page = '')
+    public function actionDefault()
     {
-        header("Location: " . new CommonPlugin_PageURL($page));
-        exit;
+        global $plugins;
+
+        if ($GLOBALS["commandline"]) {
+            ob_end_clean();
+            print ClineSignature();
+            ob_start();
+        }
+
+        $this->model->setLastProcess();
+
+        $messageIds = $this->model->setPending();
+
+        foreach ($messageIds as $mid) {
+            foreach ($plugins as $plugin) {
+                $plugin->messageReQueued($mid);
+            }
+        }
+        $count = count($messageIds);
+        echo "$count messages processed";
+
+        if ($GLOBALS["commandline"]) {
+            ob_flush();
+        }
     }
 }

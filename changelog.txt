@@ -1,3 +1,8 @@
+version 2.1.0+20150811
+      Can now edit an autoresponder
+      Further refactoring
+      Improve layout of listing
+
 version 2.0.1+20150807
       Fix misnamed column when adding user to list
 
