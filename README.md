@@ -78,11 +78,12 @@ The phplist process queue command still needs to be run in order to actually sen
 
 ## Version history ##
 
-    version     Description
-    2015-07-30  Added action to add subscribers to another list when campaign has been sent
-    2015-02-15  Inform plugins when a campaign is requeued
-    2015-02-02  Allow delay value to be entered directly, "process" now a separate page
-    2013-12-12  Workaround for phplist bug - Mantis 16940
-    2013-11-05  Removed key processing, added command line support
-    2013-11-01  Added to GitHub
-    2013-10-31  Initial version for phplist 3.0.x converted from 2.10 version
+    version         Description
+    2.0.1+20150807  Fixes bug in not adding subscriber to another list
+    2015-07-30      Added action to add subscribers to another list when campaign has been sent
+    2015-02-15      Inform plugins when a campaign is requeued
+    2015-02-02      Allow delay value to be entered directly, "process" now a separate page
+    2013-12-12      Workaround for phplist bug - Mantis 16940
+    2013-11-05      Removed key processing, added command line support
+    2013-11-01      Added to GitHub
+    2013-10-31      Initial version for phplist 3.0.x converted from 2.10 version

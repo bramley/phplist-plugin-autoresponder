@@ -397,7 +397,7 @@ END
 
         $res = Sql_Query(<<<END
             INSERT IGNORE INTO $tables[listuser]
-            (addlistid, userid, entered)
+            (listid, userid, entered)
             VALUES ($listId, $userId, now())
 END
         );

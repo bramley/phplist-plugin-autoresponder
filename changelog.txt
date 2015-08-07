@@ -1,3 +1,6 @@
+version 2.0.1+20150807
+      Fix misnamed column when adding user to list
+
 version 2015-07-30
       Add subscriber to a list when the campaign has been sent
 
