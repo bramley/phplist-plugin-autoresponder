@@ -47,7 +47,7 @@ class Autoresponder_Populator implements CommonPlugin_IPopulator
             $w->addRow(
                 $key,
                 'Autoresponder email will be sent',
-                sprintf('%s after subscription to %s', $delay, implode(', ', $item['list_names']))
+                sprintf('%s after subscription to %s', $delay, $item['list_names'])
             );
 
             if ($item['addlist']) {

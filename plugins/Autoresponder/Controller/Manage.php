@@ -48,7 +48,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
     {
         return array_map(
             function ($item) {
-                return $item['subject'] . ' (' . implode(',', $item['list_names']) . ')';
+                return $item['subject'] . ' (' . $item['list_names'] . ')';
             },
             $this->model->getPossibleMessages($mid)
         );

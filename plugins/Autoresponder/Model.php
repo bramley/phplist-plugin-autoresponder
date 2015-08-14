@@ -58,11 +58,17 @@ END;
         }
     }
 
-    private function getAttribute($id)
+    private function attributeName($arId)
     {
+        return "autoresponder_$arId";
+    }
+
+    private function getAttribute($arId)
+    {
+        $name = $this->attributeName($arId);
         $res = Sql_Query(
             "SELECT * FROM {$this->tables['attribute']}
-            WHERE name = 'autoresponder_$id'"
+            WHERE name = '$name'"
         );
         return Sql_Fetch_Array($res);
     }
@@ -90,9 +96,17 @@ END;
     {
         $or = $mid ? "OR m.id = $mid" : '';
         $res = Sql_Query(
-            "SELECT GROUP_CONCAT(DISTINCT lm.listid SEPARATOR ',') AS list_ids, m.id, m.subject
+            "SELECT
+                GROUP_CONCAT(
+                    DISTINCT l.name
+                    ORDER BY l.name
+                    SEPARATOR ','
+                ) AS list_names,
+                m.id,
+                m.subject
             FROM {$this->tables['message']} m
             INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
+            INNER JOIN {$this->tables['list']} l ON l.id = lm.listid
             LEFT JOIN {$this->tables['autoresponders']} ar ON m.id = ar.mid
             WHERE (status = 'draft' AND ar.id IS NULL AND lm.listid != 0)
             $or
@@ -100,16 +114,8 @@ END;
         );
 
         $messages = array();
-        $listNames = $this->getListNames();
 
-        while (($row = Sql_Fetch_Array($res))) {
-            $row['list_ids'] = explode(',', $row['list_ids']);
-            $row['list_names'] = array();
-
-            foreach ($row['list_ids'] as $id) {
-                $row['list_names'][$id] = isset($listNames[$id]) ? $listNames[$id] : 'Unknown';
-            }
-
+        while ($row = Sql_Fetch_Array($res)) {
             $messages[$row['id']] = $row;
         }
 
@@ -248,42 +254,30 @@ END;
 
         if ($responders === null) {
             $responders = array();
-            $res = Sql_Query("
-                SELECT ar.*, m.subject, GROUP_CONCAT(DISTINCT lm.listid SEPARATOR ',') AS list_ids
+            $sql = "
+                SELECT
+                    ar.*,
+                    m.subject,
+                    GROUP_CONCAT(
+                        DISTINCT l.name
+                        ORDER BY l.name
+                        SEPARATOR ', '
+                    ) AS list_names,
+                    l2.name AS addlist
                 FROM {$this->tables['autoresponders']} ar
                 INNER JOIN {$this->tables['message']} m ON ar.mid = m.id
                 INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
+                INNER JOIN {$this->tables['list']} l ON l.id = lm.listid
+                LEFT JOIN {$this->tables['list']} l2 ON l2.id = ar.addlistid
                 WHERE lm.listid != 0
                 GROUP BY ar.id
-            ");
-
-            $listNames = $this->getListNames();
+                ORDER BY list_names, ar.mins
+            ";
+            $res = Sql_Query($sql);
 
             while (($row = Sql_Fetch_Array($res))) {
-                // convert list ids to list names
-                $row['list_ids'] = explode(',', $row['list_ids']);
-                $row['list_names'] = array();
-
-                foreach ($row['list_ids'] as $id) {
-                    $row['list_names'][$id] = isset($listNames[$id]) ? $listNames[$id] : 'Unknown';
-                }
-
-                // include name of list to add to
-                $addListId = $row['addlistid'];
-                $row['addlist'] = isset($listNames[$addListId]) ? $listNames[$addListId] : '';
-
-                $responders[$row['id']] = $row;
+                $responders[] = $row;
             }
-
-            uasort(
-                $responders,
-                function ($a, $b) {
-                    $aname = reset($a['list_names']);
-                    $bname = reset($b['list_names']);
-                    $r = strcmp($aname, $bname);
-                    return ($r == 0) ? $a['mins'] - $b['mins'] : $r;
-                }
-             );
         }
         return $responders;
     }
@@ -298,30 +292,27 @@ END;
                 (enabled, mid, mins, addlistid, new, entered)
                 VALUES (1, $mid, $mins, $addListId, $new, now())"
             );
-
-            $res = Sql_Query(
-                sprintf("SELECT id FROM {$this->tables['autoresponders']} WHERE mid = %d", $mid));
-
-            $row = Sql_Fetch_Array($res);
+            $arId = Sql_Insert_Id();
+            $attrName = $this->attributeName($arId);
 
             Sql_Query(
                 "INSERT INTO {$this->tables['attribute']}
                 (name, type, listorder, default_value, required, tablename)
-                VALUES ('autoresponder_{$row['id']}', 'hidden', 0, '', 0, 'autoresponder_{$row['id']}')"
+                VALUES ('$attrName', 'hidden', 0, '', 0, '$attrName')"
             );
-
-            $attribute = $this->getAttribute($row['id']);
+            $attrId = Sql_Insert_Id();
 
             $selectionQuery = 
                 "SELECT ua.userid
                 FROM {$this->tables['user_attribute']} ua
                 LEFT JOIN {$this->tables['usermessage']} um ON ua.userid = um.userid AND um.messageid = $mid
-                WHERE ua.attributeid = {$attribute['id']} AND ua.value != '' AND ua.value IS NOT NULL AND um.userid IS NULL";
+                WHERE ua.attributeid = $attrId AND ua.value != '' AND ua.value IS NOT NULL AND um.userid IS NULL";
 
             Sql_Query(
                 sprintf(
                     "UPDATE {$this->tables['message']}
-                    SET userselection = '%s' WHERE id = %d",
+                    SET userselection = '%s'
+                    WHERE id = %d",
                     sql_escape($selectionQuery),
                     $mid
                 )
@@ -331,6 +322,7 @@ END;
         }
         catch (Exception $e) {
             Sql_Query('ROLLBACK');
+            logEvent($e->getMessage());
             return false;
         }
         return true;
