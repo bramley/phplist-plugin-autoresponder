@@ -20,11 +20,11 @@
  */
 class Autoresponder_Controller_Process extends CommonPlugin_Controller
 {
-    private $model;
+    private $dao;
 
     public function __construct()
     {
-        $this->model = new Autoresponder_Model();
+        $this->dao = new Autoresponder_DAO();
     }
 
     public function actionDefault()
@@ -37,9 +37,9 @@ class Autoresponder_Controller_Process extends CommonPlugin_Controller
             ob_start();
         }
 
-        $this->model->setLastProcess();
+        $this->dao->setLastProcess();
 
-        $messageIds = $this->model->setPending();
+        $messageIds = $this->dao->setPending();
 
         foreach ($messageIds as $mid) {
             foreach ($plugins as $plugin) {

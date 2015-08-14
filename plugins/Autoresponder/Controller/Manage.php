@@ -20,7 +20,7 @@
  */
 class Autoresponder_Controller_Manage extends CommonPlugin_Controller
 {
-    private $model;
+    private $dao;
 
     /*
      *    Private methods
@@ -50,7 +50,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
             function ($item) {
                 return $item['subject'] . ' (' . $item['list_names'] . ')';
             },
-            $this->model->getPossibleMessages($mid)
+            $this->dao->getPossibleMessages($mid)
         );
     }
 
@@ -84,7 +84,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
     {
         $listing = new CommonPlugin_Listing(
             $this,
-            new Autoresponder_Populator($this->model->getAutoresponders())
+            new Autoresponder_Populator($this->dao->getAutoresponders())
         );
 
         if (isset($_SESSION['autoresponder_errors'])) {
@@ -147,7 +147,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         $lists = CHtml::dropDownList(
             'addlist',
             isset($params['addlistid']) ? $params['addlistid'] : 0,
-            $this->model->getListNames(),
+            $this->dao->getListNames(),
             array('prompt' => 'Select ...' )
         );
         $newOnly = CHtml::checkbox('new', isset($params['new']) ? $params['new'] : 1);
@@ -215,7 +215,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         if (!$errors) {
             $addListId = $_POST['addlist'] ? $_POST['addlist'] : 0;
 
-            if (!$this->model->addAutoresponder($_POST['mid'], $delayMinutes, $addListId, empty($_POST['new']) ? 0 : 1)) {
+            if (!$this->dao->addAutoresponder($_POST['mid'], $delayMinutes, $addListId, empty($_POST['new']) ? 0 : 1)) {
                 $errors[] = 'Was unable to add autoresponder';
             }
         }
@@ -234,7 +234,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
     {
         // accessed using GET
         if (!isset($_POST['submit'])) {
-            $ar = $this->model->autoresponder($_GET['id']);
+            $ar = $this->dao->autoresponder($_GET['id']);
             echo $this->displayform(array('title' => 'Amend Autoresponder') + $ar, true);
             return;
         }
@@ -259,7 +259,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         if (!$errors) {
             $addListId = $_POST['addlist'] ? $_POST['addlist'] : 0;
 
-            if (!$this->model->updateAutoresponder(
+            if (!$this->dao->updateAutoresponder(
                 $_GET['id'],
                 $delayMinutes,
                 $addListId,
@@ -284,7 +284,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         $id = isset($_GET['id']) ? intval($_GET['id']) : null;
 
         if ($id) {
-            if ($this->model->deleteAutoresponder($id)) {
+            if ($this->dao->deleteAutoresponder($id)) {
                 Autoresponder_Util::pluginRedirect();
             }
             $error = 'Was unable to delete autoresponder';
@@ -299,7 +299,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         $id = isset($_GET['id']) ? intval($_GET['id']) : null;
 
         if ($id) {
-            if ($this->model->toggleEnabled($id)) {
+            if ($this->dao->toggleEnabled($id)) {
                 Autoresponder_Util::pluginRedirect();
             }
             $error = 'Was unable to enable/disable autoresponder';
@@ -315,6 +315,6 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->model = new Autoresponder_Model();
+        $this->dao = new Autoresponder_DAO();
     }
 }

@@ -18,10 +18,10 @@
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
  * @link      http://brightflock.com
  */
-class Autoresponder_Model
-{
-    private static $TABLE = 'autoresponders';
+use phpList\plugin\Common;
 
+class Autoresponder_DAO extends Common\DAO
+{
     /**
      * Create the database table
      * Upgrade the table by adding the addlistid column
@@ -78,10 +78,9 @@ END;
      */
     public function __construct()
     {
-        global $tables;
-        global $table_prefix;
+        parent::__construct(new Common\DB());
 
-        $this->tables = $tables + array('autoresponders' => $table_prefix . 'autoresponders');
+        $this->tables['autoresponders'] = $this->table_prefix . 'autoresponders';
         $this->init();
     }
 

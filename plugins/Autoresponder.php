@@ -91,9 +91,9 @@ class Autoresponder extends phplistPlugin
         if ($isTestMail) {
             return;
         }
-        $model = new Autoresponder_Model;
+        $dao = new Autoresponder_DAO;
 
-        if (!($ar = $model->getAutoresponderForMessage($messageId))) {
+        if (!($ar = $dao->getAutoresponderForMessage($messageId))) {
             return;
         }
 
@@ -104,7 +104,7 @@ class Autoresponder extends phplistPlugin
             return;
         }
         
-        if ($model->addSubscriberToList($listId, $userdata['id'])) {
+        if ($dao->addSubscriberToList($listId, $userdata['id'])) {
             addUserHistory(
                 $userdata['email'],
                 "Added to list automatically",
