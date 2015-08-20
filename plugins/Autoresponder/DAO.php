@@ -35,6 +35,7 @@ class Autoresponder_DAO extends Common\DAO
             $r = Sql_Query(
                 "CREATE TABLE {$this->tables['autoresponders']} (
                     id INT(11) NOT NULL AUTO_INCREMENT,
+                    description VARCHAR(255) DEFAULT '',
                     enabled BOOL NOT NULL,
                     mid INT(11) NOT NULL,
                     mins INT(11) NOT NULL,
@@ -52,6 +53,17 @@ class Autoresponder_DAO extends Common\DAO
             $sql = <<<END
                 ALTER TABLE {$this->tables['autoresponders']}
                 ADD COLUMN addlistid INT(11) AFTER mins
+END;
+            Sql_Query($sql);
+            logEvent('Autoresponder plugin table upgraded');
+        }
+
+        $r = Sql_Query("SHOW COLUMNS FROM {$this->tables['autoresponders']} LIKE 'description'");
+
+        if (!(bool)Sql_Num_Rows($r)) {
+            $sql = <<<END
+                ALTER TABLE {$this->tables['autoresponders']}
+                ADD COLUMN description VARCHAR(255) DEFAULT '' AFTER id
 END;
             Sql_Query($sql);
             logEvent('Autoresponder plugin table upgraded');
@@ -85,15 +97,14 @@ END;
     }
 
     /**
-     * Gets available draft messages
-     * Includes an additional specific message, for use when editing an autoresponder.
-     * @param int $mid additional message to include in the results
+     * Gets either all available draft messages or a specific message, used when editing an autoresponder.
+     * @param int $mid specific message id
      * @return array associative array indexed by message id
      * @access public
      */
     public function getPossibleMessages($mid)
     {
-        $or = $mid ? "OR m.id = $mid" : '';
+        $where = $mid ? "m.id = $mid" : "status = 'draft' AND ar.id IS NULL AND lm.listid != 0";
         $res = Sql_Query(
             "SELECT
                 GROUP_CONCAT(
@@ -107,8 +118,7 @@ END;
             INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
             INNER JOIN {$this->tables['list']} l ON l.id = lm.listid
             LEFT JOIN {$this->tables['autoresponders']} ar ON m.id = ar.mid
-            WHERE (status = 'draft' AND ar.id IS NULL AND lm.listid != 0)
-            $or
+            WHERE $where
             GROUP BY m.id"
         );
 
@@ -226,35 +236,49 @@ END;
         static $names = null;
 
         if ($names === null) {
-            $names = array();
+            $names = $this->dbCommand->queryColumn(
+                "SELECT id, name FROM {$this->tables['list']}",
+                'name',
+                'id'
+            );
+        }
+        return $names;
+    }
 
-            $res = Sql_Query("SELECT id, name FROM {$this->tables['list']}");
+    public function getArListNames()
+    {
+        static $names = null;
 
-            while (($row = Sql_Fetch_Array($res))) {
-                $names[$row['id']] = $row['name'];
-            }
+        if ($names === null) {
+            $sql = 
+                "SELECT l.id, l.name
+                FROM {$this->tables['list']} l
+                JOIN {$this->tables['listmessage']} lm ON l.id = lm.listid
+                JOIN {$this->tables['autoresponders']} ar ON ar.mid = lm.messageid";
+            $names = $this->dbCommand->queryColumn($sql, 'name', 'id');
         }
         return $names;
     }
 
     public function autoresponder($id)
     {
-        $res = Sql_Query(
+        $sql =
             "SELECT ar.*
             FROM {$this->tables['autoresponders']} ar
-            WHERE ar.id = $id"
-        );
-        return Sql_Fetch_Array($res);
+            WHERE ar.id = $id";
+        return $this->dbCommand->queryRow($sql);
     }
 
-    public function getAutoresponders()
+    public function getAutoresponders($listId = 0)
     {
         static $responders = null;
 
         if ($responders === null) {
-            $responders = array();
-            $sql = "
-                SELECT
+            $where = ($listId > 0)
+                ? "lm.listid = $listId"
+                : 'lm.listid != 0';
+            $sql =
+                "SELECT
                     ar.*,
                     m.subject,
                     GROUP_CONCAT(
@@ -268,28 +292,23 @@ END;
                 INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
                 INNER JOIN {$this->tables['list']} l ON l.id = lm.listid
                 LEFT JOIN {$this->tables['list']} l2 ON l2.id = ar.addlistid
-                WHERE lm.listid != 0
+                WHERE $where
                 GROUP BY ar.id
-                ORDER BY list_names, ar.mins
-            ";
-            $res = Sql_Query($sql);
-
-            while (($row = Sql_Fetch_Array($res))) {
-                $responders[] = $row;
-            }
+                ORDER BY list_names, ar.mins";
+            $responders = $this->dbCommand->queryAll($sql);
         }
         return $responders;
     }
 
-    public function addAutoresponder($mid, $mins, $addListId, $new = 1)
+    public function addAutoresponder($description, $mid, $mins, $addListId, $new = 1)
     {
         try {
             Sql_Query('BEGIN');
 
             Sql_Query(
                 "INSERT INTO {$this->tables['autoresponders']}
-                (enabled, mid, mins, addlistid, new, entered)
-                VALUES (1, $mid, $mins, $addListId, $new, now())"
+                (description, enabled, mid, mins, addlistid, new, entered)
+                VALUES ('$description', 1, $mid, $mins, $addListId, $new, now())"
             );
             $arId = Sql_Insert_Id();
             $attrName = $this->attributeName($arId);
@@ -327,13 +346,14 @@ END;
         return true;
     }
 
-    public function updateAutoresponder($id, $mins, $addListId, $new)
+    public function updateAutoresponder($id, $description, $mins, $addListId, $new)
     {
-        Sql_Query(
+        $description = sql_escape($description);
+        $sql = 
             "UPDATE {$this->tables['autoresponders']}
-            SET mins = $mins, addlistid = $addListId, new = $new
-            WHERE id = $id"
-        );
+            SET description = '$description', mins = $mins, addlistid = $addListId, new = $new
+            WHERE id = $id";
+        $count = $this->dbCommand->queryAffectedRows($sql);
         return true;
     }
 
@@ -344,41 +364,39 @@ END;
         try {
             Sql_Query('BEGIN');
 
-            $res = Sql_Query(
+            $sql =
                 "SELECT mid FROM {$this->tables['autoresponders']}
-                WHERE id = $id"
-            );
+                WHERE id = $id";
+            $mid = $this->dbCommand->queryOne($sql, 'mid');
 
-            $row = Sql_Fetch_Array($res);
-
-            if ($row && isset($row['mid'])) {
-                Sql_Query(
+            if ($mid) {
+                $sql =
                     "UPDATE {$this->tables['message']}
                     SET status = 'draft', userselection = NULL
-                    WHERE id = {$row['mid']}"
-                );
+                    WHERE id = $mid";
+                $count = $this->dbCommand->queryAffectedRows($sql);
 
-                Sql_Query(
+                $sql =
                     "DELETE FROM {$this->tables['usermessage']}
-                    WHERE messageid = {$row['mid']}"
-                );
+                    WHERE messageid = $mid";
+                $count = $this->dbCommand->queryAffectedRows($sql);
             }
 
-            Sql_query(
+            $sql =
                 "DELETE FROM {$this->tables['autoresponders']}
-                WHERE id = $id"
-            );
+                WHERE id = $id";
+            $count = $this->dbCommand->queryAffectedRows($sql);
 
             if ($attribute) {
-                Sql_query(
+                $sql = 
                     "DELETE FROM {$this->tables['attribute']}
-                    WHERE id = {$attribute['id']}"
-                );
+                    WHERE id = {$attribute['id']}";
+                $count = $this->dbCommand->queryAffectedRows($sql);
 
-                Sql_query(
+                $sql = 
                     "DELETE FROM {$this->tables['user_attribute']}
-                    WHERE attributeid = {$attribute['id']}"
-                );
+                    WHERE attributeid = {$attribute['id']}";
+                $count = $this->dbCommand->queryAffectedRows($sql);
             }
 
             Sql_Query('COMMIT');
@@ -402,7 +420,7 @@ END;
     {
         $row = Sql_Fetch_Assoc(
             Sql_Query(<<<END
-                SELECT id, addlistid
+                SELECT id, addlistid, description
                 FROM {$this->tables['autoresponders']} a
                 WHERE a.mid = $messageId
 END

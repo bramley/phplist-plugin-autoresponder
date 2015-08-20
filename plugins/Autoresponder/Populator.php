@@ -22,7 +22,7 @@ class Autoresponder_Populator implements CommonPlugin_IPopulator
 {
     private $autoresponders;
 
-    public function __construct(array $autoresponders)
+    public function __construct($autoresponders)
     {
         $this->autoresponders = $autoresponders;
     }
@@ -38,12 +38,21 @@ class Autoresponder_Populator implements CommonPlugin_IPopulator
             );
             $deleteLink = new CommonPlugin_PageLink(
                 new CommonPlugin_PageURL(null, array('action' => 'delete', 'id' => $item['id'])),
-                'delete'
+                'delete',
+                array('onclick' => "return confirm('Delete autoresponder {$item['id']}, are you sure?')")
             );
             $delay = Autoresponder_Util::formatMinutes($item['mins']);
             $key = $item['id'];
             $w->addElement($key, new CommonPlugin_PageURL(null, array('action' => 'edit', 'id' => $item['id'])));
-            $w->addRow($key, 'Campaign', $item['mid'] . ' | ' . $item['subject']);
+            $w->addRow($key, 'Description', $item['description']);
+            $w->addRowHtml(
+                $key,
+                'Campaign',
+                new CommonPlugin_PageLink(
+                    new CommonPlugin_PageURL('message', array('id' => $item['mid'])),
+                    $item['mid'] . ' | ' . htmlspecialchars($item['subject'])
+                )
+            );
             $w->addRow(
                 $key,
                 'Autoresponder email will be sent',

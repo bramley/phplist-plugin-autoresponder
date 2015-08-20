@@ -86,7 +86,7 @@ class Autoresponder extends phplistPlugin
      * @param   bool  $isTestMail whether sending a test email
      * @return  none
      */
-    public function processSendSuccess($messageId, $userdata, $isTestMail)
+    public function processSendSuccess($messageId, $userdata, $isTestMail = false)
     {
         if ($isTestMail) {
             return;
@@ -111,6 +111,34 @@ class Autoresponder extends phplistPlugin
                 "Added to list $listId by autoresponder $autoId, message $messageId"
             );
         }
+    }
 
+    /**
+     * Hook for displaying fields when a message is viewed
+     * If the message has an autoresponder then display a link to the autoresponder page
+     *
+     * @access  public
+     * @param   int  $messageId the message id
+     * @param   array  $userdata array of user data
+     * @return  none
+     */
+    public function viewMessage($messageId, $data)
+    {
+        $dao = new Autoresponder_DAO;
+
+        if (!($ar = $dao->getAutoresponderForMessage($messageId))) {
+            return false;
+        }
+        $description = htmlspecialchars($ar['description']);
+        $link = new CommonPlugin_PageLink(
+            new CommonPlugin_PageURL('manage', array('pi' => 'Autoresponder')),
+            "Autoresponder {$ar['id']}"
+        );
+        $html = <<<END
+    $link
+    <br />
+    $description
+END;
+        return array('Autoresponder', $html);
     }
 }

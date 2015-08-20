@@ -80,56 +80,73 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         return $data;
     }
 
+    /**
+     * Displays a filter by list and listing of autoresponders
+     * 
+     * @param array $params Additonal parameters, currently only error messages
+     * 
+     * @return string The generated HTML
+     * @access private
+     */
     private function displayAutoresponders(array $params = array())
     {
+        $listId = (isset($_GET['listfilter']) && ctype_digit($_GET['listfilter']))
+            ? $_GET['listfilter']
+            : 0;
+        $listSelect = CHtml::dropDownList(
+            'listfilter',
+            $listId,
+            array(0 => 'All') + $this->dao->getArListNames(),
+            array('class' => 'autosubmit')
+        );
         $listing = new CommonPlugin_Listing(
             $this,
-            new Autoresponder_Populator($this->dao->getAutoresponders())
+            new Autoresponder_Populator($this->dao->getAutoresponders($listId))
         );
 
         if (isset($_SESSION['autoresponder_errors'])) {
             $errors = $_SESSION['autoresponder_errors'];
             unset($_SESSION['autoresponder_errors']);
         } else {
-            if (isset($params['errorMessages'])) {
-                $errors = $params['errorMessages'];
+            if (isset($params['errors'])) {
+                $errors = $params['errors'];
             } else {
                 $errors = array();
             }
         }
+        $panel = new UIPanel(
+            $this->i18n->get('Filter'),
+            $this->render(
+                __DIR__ . '/../filterview.tpl.php',
+                array('filter' => $listSelect)
+            )
+        );
         $vars = array(
-            'errorMessages' => $errors,
+            'errors' => $errors,
+            'panel' => $panel->display(),
             'listing' => $listing->display()
         );
-
         return $this->render(__DIR__ . '/../listingview.tpl.php', $vars);
     }
 
     /**
      * Displays the autoresponder form for adding and amending an autoresponder
-     * When adding there are no default values.
+     * When adding default values are provided
      * When editing the existing autoresponder values are used, and the message id cannot
      * be changed.
      * 
-     * @param array $params Values for an existing autoresponder
+     * @param array $params Defaults for a new ar or current values for an existing ar
      * @param boolean $disable Whether to disable the message select list, when editing
      * an autoresponder
      * 
      * @return string The generated HTML for the form
-     * @access public
+     * @access private
      */
-    private function displayform($params, $disable = false)
+    private function displayform($params)
     {
-        $options = array('prompt' => 'Select ...');
-
-        if ($disable) {
-            $options['disabled'] = 'disabled';
-        }
-        $mid = isset($params['mid']) ? $params['mid'] : 0;
-        $messages = CHtml::dropDownList('mid', $mid, $this->messageListData($mid), $options);
         $delayData = $this->delayData();
 
-        if (isset($params['mins'])) {
+        if ($params['mins'] > 0) {
             if (isset($delayData[$params['mins']])) {
                 $minsSelected = $params['mins'];
                 $delay = '';
@@ -141,18 +158,13 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
             $minsSelected = 0;
             $delay = '';
         }
-            
-        $mins = CHtml::dropDownList('mins', $minsSelected, $delayData, array('prompt' => 'Select ...' ));
-        $delay = CHtml::textField('delay', $delay);
-        $lists = CHtml::dropDownList(
+
+        $listSelect = CHtml::dropDownList(
             'addlist',
-            isset($params['addlistid']) ? $params['addlistid'] : 0,
+            $params['addlistid'],
             $this->dao->getListNames(),
             array('prompt' => 'Select ...' )
         );
-        $newOnly = CHtml::checkbox('new', isset($params['new']) ? $params['new'] : 1);
-        $submit = CHtml::submitButton($params['title'], array('name' => 'submit'));
-        $cancel = new CommonPlugin_PageLink(new CommonPlugin_PageURL(null), 'Cancel', array('class' => 'button'));
 
         if (isset($_SESSION['autoresponder_errors'])) {
             $errors = $_SESSION['autoresponder_errors'];
@@ -161,16 +173,21 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
             $errors = array();
         }
 
+        $mid = $params['mid'];
+        $options = array('prompt' => 'Select ...');
+
+        $cancel = new CommonPlugin_PageLink(new CommonPlugin_PageURL(null), 'Cancel', array('class' => 'button'));
         $vars = array(
-            'messages' => $messages,
-            'mins' => $mins,
-            'delay' => $delay,
-            'lists' => $lists,
-            'newOnly' => $newOnly,
-            'submit' => $submit,
+            'description' => CHtml::textField('description', $params['description']),
+            'messages' => CHtml::dropDownList('mid', $mid, $this->messageListData($mid), array('prompt' => 'Select ...')),
+            'mins' => CHtml::dropDownList('mins', $minsSelected, $delayData, array('prompt' => 'Select ...' )),
+            'delay' => CHtml::textField('delay', $delay),
+            'lists' => $listSelect,
+            'newOnly' => CHtml::checkbox('new', $params['new']),
+            'submit' => CHtml::submitButton($params['title'], array('name' => 'submit')),
             'cancel' => $cancel,
             'title' => $params['title'],
-            'errorMessages' => $errors,
+            'errors' => $errors,
         );
         return $this->render(__DIR__ . '/../formview.tpl.php', $vars);
     }
@@ -187,7 +204,20 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
     {
         // accessed using GET
         if (!isset($_POST['submit'])) {
-            echo $this->displayform(array('title' => 'Add Autoresponder'));
+            if (isset($_SESSION['autoresponder_form'])) {
+                $values = $_SESSION['autoresponder_form'];
+                unset($_SESSION['autoresponder_form']);
+            } else {
+                $values = array(
+                    'description' => '',
+                    'mid' => 0,
+                    'mins' => 0,
+                    'addlistid' => 0,
+                    'new' => 1,
+                );
+            }
+            $values['title'] = 'Add Autoresponder';
+            echo $this->displayform($values);
             return;
         }
 
@@ -197,6 +227,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         if (empty($_POST['mid'])) {
             $errors[] = 'A message must be selected';
         }
+        $delayMinutes = 0;
 
         if (!empty($_POST['delay'])) {
             $delay = trim($_POST['delay']);
@@ -211,20 +242,33 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         } else {
             $errors[] = 'Please select or enter delay value';
         }
+        $addListId = $_POST['addlist'] ? $_POST['addlist'] : 0;
+        $newOnly = empty($_POST['new']) ? 0 : 1;
 
         if (!$errors) {
-            $addListId = $_POST['addlist'] ? $_POST['addlist'] : 0;
-
-            if (!$this->dao->addAutoresponder($_POST['mid'], $delayMinutes, $addListId, empty($_POST['new']) ? 0 : 1)) {
+            if (!$this->dao->addAutoresponder(
+                $_POST['description'],
+                $_POST['mid'],
+                $delayMinutes,
+                $addListId,
+                $newOnly
+            )) {
                 $errors[] = 'Was unable to add autoresponder';
             }
         }
 
         if ($errors) {
             header('Location: ' . new CommonPlugin_PageURL(null, array('action' => 'add')));
+            $_SESSION['autoresponder_form'] = array(
+                'description' => $_POST['description'],
+                'mid' => $_POST['mid'],
+                'mins' => $delayMinutes,
+                'addlistid' => $addListId,
+                'new' => $newOnly
+            );
         } else {
             $errors[] = 'Autoresponder added';
-            header('Location: ' . new CommonPlugin_PageURL(null));
+            header('Location: ' . new CommonPlugin_PageURL());
         }
         $_SESSION['autoresponder_errors'] = $errors;
         exit;
@@ -234,13 +278,24 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
     {
         // accessed using GET
         if (!isset($_POST['submit'])) {
-            $ar = $this->dao->autoresponder($_GET['id']);
-            echo $this->displayform(array('title' => 'Amend Autoresponder') + $ar, true);
+            if (isset($_SESSION['autoresponder_form'])) {
+                $values = $_SESSION['autoresponder_form'];
+                unset($_SESSION['autoresponder_form']);
+            } else {
+                $values = $this->dao->autoresponder($_GET['id']);
+            }
+            $values['title'] = 'Amend Autoresponder';
+            echo $this->displayform($values);
             return;
         }
 
         // accessed using POST
         $errors = array();
+
+        if (empty($_POST['mid'])) {
+            $errors[] = 'A message must be selected';
+        }
+        $delayMinutes = 0;
 
         if (!empty($_POST['delay'])) {
             $delay = trim($_POST['delay']);
@@ -255,25 +310,33 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         } else {
             $errors[] = 'Please select or enter delay value';
         }
+        $addListId = $_POST['addlist'] ? $_POST['addlist'] : 0;
+        $newOnly = empty($_POST['new']) ? 0 : 1;
 
         if (!$errors) {
-            $addListId = $_POST['addlist'] ? $_POST['addlist'] : 0;
-
             if (!$this->dao->updateAutoresponder(
                 $_GET['id'],
+                $_POST['description'],
                 $delayMinutes,
                 $addListId,
-                empty($_POST['new']) ? 0 : 1)
-            ) {
+                $newOnly
+            )) {
                 $errors[] = 'Was unable to update autoresponder';
             }
         }
 
         if ($errors) {
             header('Location: ' . new CommonPlugin_PageURL(null, array('action' => 'edit', 'id' => $_GET['id'])));
+            $_SESSION['autoresponder_form'] = array(
+                'description' => $_POST['description'],
+                'mid' => $_POST['mid'],
+                'mins' => $delayMinutes,
+                'addlistid' => $addListId,
+                'new' => $newOnly
+            );
         } else {
             $errors[] = "Autoresponder {$_GET['id']} amended";
-            header('Location: ' . new CommonPlugin_PageURL(null));
+            header('Location: ' . new CommonPlugin_PageURL());
         }
         $_SESSION['autoresponder_errors'] = $errors;
         exit;
@@ -291,7 +354,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         } else {
             $error = 'A message id must be specified';
         }
-        echo $this->displayAutoresponders(array('errorMessages' => array($error)));
+        echo $this->displayAutoresponders(array('errors' => array($error)));
     }
 
     protected function actionEnable()
@@ -306,7 +369,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         } else {
             $error = 'A message id must be specified';
         }
-        echo $this->displayAutoresponders(array('errorMessages' => array($error)));
+        echo $this->displayAutoresponders(array('errors' => array($error)));
     }
 
     /*

@@ -17,7 +17,7 @@ is due.
 
 Requires php version 5.3 or later.
 
-Requires the Common Plugin to be installed. You must install the plugin or upgrade to the latest version if it is already installed.
+Requires the Common Plugin v3 to be installed. You must install the plugin or upgrade to the latest version if it is already installed.
 See <https://github.com/bramley/phplist-plugin-common>
 
 ### Set the plugin directory ###
@@ -51,6 +51,7 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    2.2.0+20150821  Filter autoresponders, added description field
     2.1.0+20150811  Can now edit an autoresponder, improved layout of listing
     2.0.1+20150807  Fixes bug in not adding subscriber to another list
     2015-07-30      Added action to add subscribers to another list when campaign has been sent

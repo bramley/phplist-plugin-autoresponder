@@ -19,20 +19,22 @@
  * @link      http://brightflock.com
  */
 ?>
-<div class="ar-admin">
-    <?php if ($errors) { ?>
-        <div class="ar-errors" style="padding-top: 10px;">
-            <div class="note">
-                <?php foreach ($errors as $msg) { ?>
-                    <?php echo htmlspecialchars($msg); ?><br/>
-                <?php } ?>
-            </div>
-        </div>
-    <?php } ?>
-    <div class="ar-admin-current" style="padding-top: 10px;">
-    <?php echo $panel; ?>
-    </div>
-    <div class="ar-admin-current" style="padding-top: 10px;">
-    <?php echo $listing; ?>
-    </div>
-</div>
+<?php
+global $pagefooter;
+
+$pagefooter[basename(__FILE__)] = <<<'END'
+<script type="text/javascript">
+$(function() {
+    $('.autosubmit').change(function() {
+        this.form.submit();
+    });
+});
+</script>
+END;
+?>
+<form method="GET" action="">
+    <input type="hidden" value=<?php echo $_GET['page']; ?>  name="page" id="page" />
+    <input type="hidden" value=<?php echo $_GET['pi']; ?>  name="pi" id="pi" />
+    <label>Filter by list
+    <?php echo $filter; ?></label>
+</form>

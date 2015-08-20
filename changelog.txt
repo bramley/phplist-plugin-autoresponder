@@ -1,3 +1,11 @@
+version 2.2.0+20150821
+      Refactoring SQL
+      Rename model to dao
+      Filter autoresponder listing by list
+      Added description field for autoresponder
+      Prompt to confirm deletion
+      Keep the entered values when adding/amending an autoresponder fails validation
+
 version 2.1.0+20150811
       Can now edit an autoresponder
       Further refactoring

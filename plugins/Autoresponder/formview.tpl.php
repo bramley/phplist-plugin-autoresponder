@@ -20,10 +20,10 @@
  */
 ?>
 <div class="ar-admin">
-    <?php if ($errorMessages) { ?>
+    <?php if ($errors) { ?>
         <div class="ar-errors" style="padding-top: 10px;">
             <div class="note">
-                <?php foreach ($errorMessages as $msg) { ?>
+                <?php foreach ($errors as $msg) { ?>
                     <?php echo $msg; ?><br/>
                 <?php } ?>
             </div>
@@ -36,6 +36,8 @@
             </div>
             <div class="content">
                 <form id="ar-admin-new-form" method="post">
+                        <label>Description:</label>
+                        <?php echo $description; ?>
                         <label>Select the draft message to send:</label>
                         <?php echo $messages; ?>
                         <p>Create further available messages by adding draft messages to phplist</p>
