@@ -17,7 +17,8 @@ is due.
 
 Requires php version 5.3 or later.
 
-Requires the Common Plugin v3 to be installed. You must install the plugin or upgrade to the latest version if it is already installed.
+This plugin requires the Common Plugin v3 to also be installed, and will not work without that.
+**You must install that plugin or upgrade to the latest version if it is already installed**.
 See <https://github.com/bramley/phplist-plugin-common>
 
 ### Set the plugin directory ###
