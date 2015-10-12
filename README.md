@@ -52,6 +52,7 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    2.2.1+20151020  Internal change to avoid php strict warning
     2.2.0+20150821  Filter autoresponders, added description field
     2.1.0+20150811  Can now edit an autoresponder, improved layout of listing
     2.0.1+20150807  Fixes bug in not adding subscriber to another list

@@ -120,9 +120,10 @@ class Autoresponder extends phplistPlugin
      * @access  public
      * @param   int  $messageId the message id
      * @param   array  $userdata array of user data
-     * @return  none
+     * @return  array|false caption and html to be added, or false if the 
+     *          message does not have an autoresponder
      */
-    public function viewMessage($messageId, $data)
+    public function viewMessage($messageId, array $data)
     {
         $dao = new Autoresponder_DAO;
 

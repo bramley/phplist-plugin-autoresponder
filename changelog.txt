@@ -1,3 +1,6 @@
+version 2.2.1+20151020
+      Added typehint
+
 version 2.2.0+20150821
       Refactoring SQL
       Rename model to dao
