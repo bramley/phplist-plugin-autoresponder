@@ -46,8 +46,12 @@ class Autoresponder_Controller_Process extends CommonPlugin_Controller
                 $plugin->messageReQueued($mid);
             }
         }
-        $count = count($messageIds);
-        echo "$count messages processed";
+
+        if (count($messageIds) > 0) {
+            echo sprintf('campaigns submitted: %s', implode(', ', $messageIds));
+        } else {
+            echo "no campaigns submitted";
+        }
 
         if ($GLOBALS["commandline"]) {
             ob_flush();

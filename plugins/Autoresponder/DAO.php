@@ -172,7 +172,7 @@ END;
         
             foreach (
                 array(
-                    'COUNT(*)',
+                    'COUNT(*) AS number',
                     $attribute['id'] . ' AS attributeid, lu.userid AS userid, now() AS value'
                 ) as $select) {
                 $q = "SELECT $select
@@ -189,18 +189,18 @@ END;
                 }
 
                 $q .= " AND (UNIX_TIMESTAMP(lu.modified) + (ar.mins * 60)) < UNIX_TIMESTAMP(now())
-                      AND um.userid IS NULL GROUP BY lu.userid";
+                      AND um.userid IS NULL
+                      GROUP BY lu.userid";
 
                 $qs[] = $q;
             }
 
-            $res = Sql_Query($qs[0]);
-            $row = Sql_Fetch_Row($res);
+            $numberReady = $this->dbCommand->queryOne($qs[0], 'number');
 
-            try {
-                Sql_Query('BEGIN');
+            if ($numberReady > 0) {
+                try {
+                    Sql_Query('BEGIN');
 
-                if ($row[0]) {
                     Sql_Query("REPLACE INTO {$this->tables['user_attribute']} " . $qs[1]);
 
                     Sql_Query(
@@ -212,22 +212,14 @@ END;
                         )
                     );
                     $messagesSubmitted[] = $ar['mid'];
+                    Sql_Query('COMMIT');
+                } catch (Exception $e) {
+                    Sql_Query('ROLLBACK');
+                    return false;
                 }
-                else {
-                    Sql_Query(
-                        "UPDATE {$this->tables['message']}
-                        SET status = 'draft'
-                        WHERE status = 'sent' AND id = {$ar['mid']}"
-                    );
-                }
-
-                Sql_Query('COMMIT');
-            }
-            catch (Exception $e) {
-                Sql_Query('ROLLBACK');
-                return false;
             }
         }
+
         return $messagesSubmitted;
     }
 
