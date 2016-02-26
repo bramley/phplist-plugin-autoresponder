@@ -1,3 +1,7 @@
+version 2.2.2+20160226
+      Leave campaign at 'sent' status
+      Coding standards changes
+
 version 2.2.1+20151020
       Added typehint
 

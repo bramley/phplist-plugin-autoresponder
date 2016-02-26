@@ -169,7 +169,7 @@ END;
             }
             $attribute = $this->getAttribute($ar['id']);
             $qs = array();
-        
+
             foreach (
                 array(
                     'COUNT(*) AS number',
@@ -242,7 +242,7 @@ END;
         static $names = null;
 
         if ($names === null) {
-            $sql = 
+            $sql =
                 "SELECT l.id, l.name
                 FROM {$this->tables['list']} l
                 JOIN {$this->tables['listmessage']} lm ON l.id = lm.listid
@@ -312,7 +312,7 @@ END;
             );
             $attrId = Sql_Insert_Id();
 
-            $selectionQuery = 
+            $selectionQuery =
                 "SELECT ua.userid
                 FROM {$this->tables['user_attribute']} ua
                 LEFT JOIN {$this->tables['usermessage']} um ON ua.userid = um.userid AND um.messageid = $mid
@@ -329,10 +329,10 @@ END;
             );
 
             Sql_Query('COMMIT');
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             Sql_Query('ROLLBACK');
             logEvent($e->getMessage());
+
             return false;
         }
         return true;
@@ -341,11 +341,12 @@ END;
     public function updateAutoresponder($id, $description, $mins, $addListId, $new)
     {
         $description = sql_escape($description);
-        $sql = 
+        $sql =
             "UPDATE {$this->tables['autoresponders']}
             SET description = '$description', mins = $mins, addlistid = $addListId, new = $new
             WHERE id = $id";
         $count = $this->dbCommand->queryAffectedRows($sql);
+
         return true;
     }
 
@@ -380,23 +381,23 @@ END;
             $count = $this->dbCommand->queryAffectedRows($sql);
 
             if ($attribute) {
-                $sql = 
+                $sql =
                     "DELETE FROM {$this->tables['attribute']}
                     WHERE id = {$attribute['id']}";
                 $count = $this->dbCommand->queryAffectedRows($sql);
 
-                $sql = 
+                $sql =
                     "DELETE FROM {$this->tables['user_attribute']}
                     WHERE attributeid = {$attribute['id']}";
                 $count = $this->dbCommand->queryAffectedRows($sql);
             }
 
             Sql_Query('COMMIT');
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             Sql_Query('ROLLBACK');
             return false;
         }
+
         return true;
     }
 
@@ -418,6 +419,7 @@ END;
 END
             )
         );
+
         return $row;
     }
 
@@ -437,6 +439,7 @@ END
             VALUES ($listId, $userId, now())
 END
         );
+
         return Sql_Affected_Rows();
     }
 }

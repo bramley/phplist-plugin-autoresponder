@@ -39,12 +39,11 @@ class Autoresponder_Util
         }
 
         return $mins . ' minute' . ($mins <> 1 ? 's' : '');
-
     }
 
     public static function pluginRedirect($page = '')
     {
-        header("Location: " . new CommonPlugin_PageURL($page));
+        header('Location: ' . new CommonPlugin_PageURL($page));
         exit;
     }
 }

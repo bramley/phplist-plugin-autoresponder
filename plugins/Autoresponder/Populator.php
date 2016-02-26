@@ -66,7 +66,6 @@ class Autoresponder_Populator implements CommonPlugin_IPopulator
             $w->addColumn($key, 'New only', $item['new'] ? 'yes' : 'no');
             $w->addColumnHtml($key, 'Enabled', $enableLink);
             $w->addColumnHtml($key, 'Delete', $deleteLink);
-
         }
         $w->addButton('Add', new CommonPlugin_PageURL(null, array('action' => 'add')));
     }

@@ -1,7 +1,7 @@
 <?php
 /**
  * Autoresponder plugin for phplist
- * 
+ *
  * This plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -10,7 +10,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * @category  phplist
  * @package   Autoresponder
  * @author    Cameron Lerch (Sponsored by Brightflock -- http://brightflock.com)
@@ -56,12 +56,13 @@ class Autoresponder extends phplistPlugin
         global $plugins;
 
         return array(
-            'Common plugin v3 installed' =>
+            'Common plugin v3 installed' => (
                 phpListPlugin::isEnabled('CommonPlugin')
-                    && 
+                &&
                 preg_match('/\d+\.\d+\.\d+/', $plugins['CommonPlugin']->version, $matches)
-                    &&
-                version_compare($matches[0], '3') > 0,
+                &&
+                version_compare($matches[0], '3') > 0
+            ),
             'PHP version 5.3.0 or greater' => version_compare(PHP_VERSION, '5.3') > 0,
         );
     }
@@ -103,7 +104,7 @@ class Autoresponder extends phplistPlugin
         if ($listId == 0) {
             return;
         }
-        
+
         if ($dao->addSubscriberToList($listId, $userdata['id'])) {
             addUserHistory(
                 $userdata['email'],
@@ -120,7 +121,7 @@ class Autoresponder extends phplistPlugin
      * @access  public
      * @param   int  $messageId the message id
      * @param   array  $userdata array of user data
-     * @return  array|false caption and html to be added, or false if the 
+     * @return  array|false caption and html to be added, or false if the
      *          message does not have an autoresponder
      */
     public function viewMessage($messageId, array $data)
