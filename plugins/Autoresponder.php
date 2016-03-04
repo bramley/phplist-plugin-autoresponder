@@ -29,11 +29,9 @@ class Autoresponder extends phplistPlugin
     public $commandlinePluginPages = array('process');
     public $topMenuLinks = array(
         'manage' => array('category' => 'campaigns'),
-        'process' => array('category' => 'campaigns')
     );
     public $pageTitles = array(
         'manage' => 'Manage autoresponders',
-        'process' => 'Process autoresponders'
     );
     public $documentationUrl = 'https://resources.phplist.com/plugin/autoresponder_3.x';
 
@@ -76,6 +74,32 @@ class Autoresponder extends phplistPlugin
             )
         );
     }
+
+    /**
+     * Hook for when process queue is run
+     * Submits any autoresponder campaigns that are pending
+     *
+     * @return  none
+     */
+    public function processQueueStart()
+    {
+        global $plugins;
+
+        $level = error_reporting(-1);
+
+        $dao = new Autoresponder_DAO;
+        $dao->setLastProcess();
+
+        $messageIds = $dao->setPending();
+
+        foreach ($messageIds as $mid) {
+            foreach ($plugins as $plugin) {
+                $plugin->messageReQueued($mid);
+            }
+        }
+        error_reporting($level);
+    }
+
     /**
      * Hook for when a message has been sent to a user
      * If the message is an autoresponder and a list has been specified then

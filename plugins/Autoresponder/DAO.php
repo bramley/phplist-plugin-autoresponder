@@ -204,14 +204,14 @@ END;
                     Sql_Query("REPLACE INTO {$this->tables['user_attribute']} " . $qs[1]);
 
                     Sql_Query(
-                        sprintf(
-                            "UPDATE {$this->tables['message']}
-                            SET status = 'submitted'
-                            WHERE (status = 'sent' OR status = 'draft') AND id = %d",
-                            $ar['mid']
-                        )
+                        "UPDATE {$this->tables['message']}
+                        SET status = 'submitted'
+                        WHERE (status = 'sent' OR status = 'draft') AND id = {$ar['mid']}"
                     );
-                    $messagesSubmitted[] = $ar['mid'];
+
+                    if (Sql_Affected_Rows() > 0) {
+                        $messagesSubmitted[] = $ar['mid'];
+                    }
                     Sql_Query('COMMIT');
                 } catch (Exception $e) {
                     Sql_Query('ROLLBACK');
