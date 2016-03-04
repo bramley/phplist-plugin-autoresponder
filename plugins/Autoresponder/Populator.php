@@ -62,6 +62,7 @@ class Autoresponder_Populator implements CommonPlugin_IPopulator
             if ($item['addlist']) {
                 $w->addRow($key, 'After sending, add subscriber to', $item['addlist']);
             }
+            $w->addRow($key, 'Subscribers ready to be sent', $item['pending']);
             $w->addColumn($key, 'Added', $item['entered']);
             $w->addColumn($key, 'New only', $item['new'] ? 'yes' : 'no');
             $w->addColumnHtml($key, 'Enabled', $enableLink);

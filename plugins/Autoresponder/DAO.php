@@ -265,30 +265,46 @@ END;
     {
         static $responders = null;
 
-        if ($responders === null) {
-            $where = ($listId > 0)
-                ? "lm.listid = $listId"
-                : 'lm.listid != 0';
-            $sql =
-                "SELECT
-                    ar.*,
-                    m.subject,
+        if ($responders !== null) {
+            return $responders;
+        }
+        $subQuery =
+            "SELECT COUNT(DISTINCT lu2.userid)
+            FROM {$this->tables['message']} m2
+            INNER JOIN {$this->tables['listmessage']} lm2 ON m2.id = lm2.messageid
+            INNER JOIN {$this->tables['listuser']} lu2 ON lm2.listid = lu2.listid
+            INNER JOIN {$this->tables['user']} u2 ON u2.id = lu2.userid AND u2.confirmed = 1 AND u2.blacklisted = 0
+            LEFT JOIN {$this->tables['usermessage']} um2 ON lu2.userid = um2.userid AND um2.messageid = m2.id
+            WHERE m2.id = ar.mid
+            AND (ar.new = 0 || ar.new = 1 && lu2.modified > ar.entered)
+            AND (UNIX_TIMESTAMP(lu2.modified) + (ar.mins * 60)) < UNIX_TIMESTAMP(now())
+            AND um2.userid IS NULL";
+
+        $where = ($listId > 0)
+            ? "lm.listid = $listId"
+            : 'lm.listid != 0';
+        $sql = <<<END
+            SELECT
+                ar.*,
+                m.subject,
                     GROUP_CONCAT(
-                        DISTINCT l.name
+                        DISTINCT CONCAT('"', l.name, '"')
                         ORDER BY l.name
                         SEPARATOR ', '
                     ) AS list_names,
-                    l2.name AS addlist
-                FROM {$this->tables['autoresponders']} ar
-                INNER JOIN {$this->tables['message']} m ON ar.mid = m.id
-                INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
-                INNER JOIN {$this->tables['list']} l ON l.id = lm.listid
-                LEFT JOIN {$this->tables['list']} l2 ON l2.id = ar.addlistid
-                WHERE $where
-                GROUP BY ar.id
-                ORDER BY list_names, ar.mins";
-            $responders = $this->dbCommand->queryAll($sql);
-        }
+                l2.name AS addlist,
+                ($subQuery) AS pending
+            FROM {$this->tables['autoresponders']} ar
+            INNER JOIN {$this->tables['message']} m ON ar.mid = m.id
+            INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
+            INNER JOIN {$this->tables['list']} l ON l.id = lm.listid
+            LEFT JOIN {$this->tables['list']} l2 ON l2.id = ar.addlistid
+            WHERE $where
+            GROUP BY ar.id
+            ORDER BY list_names, ar.mins
+END;
+        $responders = $this->dbCommand->queryAll($sql);
+
         return $responders;
     }
 
