@@ -142,22 +142,6 @@ END;
         return true;
     }
 
-    public function setLastProcess()
-    {
-        global $tables;
-
-        Sql_Query(
-            "REPLACE INTO {$this->tables['config']}
-            (item, value, editable)
-            VALUES ('autoresponder_last_process', now(), 0)"
-        );
-    }
-
-    public function getLastProcess()
-    {
-        return getConfig('autoresponder_last_process');
-    }
-
     public function setPending()
     {
         $ars = $this->getAutoresponders();
