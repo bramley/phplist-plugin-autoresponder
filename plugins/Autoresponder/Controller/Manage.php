@@ -119,7 +119,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
             'filter' => $listSelect,
             'listing' => $listing->display()
         );
-        return $this->render(__DIR__ . '/../listingview.tpl.php', $vars);
+        return $this->render(__DIR__ . '/../View/listingview.tpl.php', $vars);
     }
 
     /**
@@ -182,7 +182,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
             'title' => $params['title'],
             'errors' => $errors,
         );
-        return $this->render(__DIR__ . '/../formview.tpl.php', $vars);
+        return $this->render(__DIR__ . '/../View/formview.tpl.php', $vars);
     }
 
     /*
