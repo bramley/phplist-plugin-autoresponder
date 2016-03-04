@@ -38,8 +38,6 @@ class Autoresponder_Controller_Process extends CommonPlugin_Controller
             ob_start();
         }
 
-        $this->dao->setLastProcess();
-
         $messageIds = $this->dao->setPending();
 
         foreach ($messageIds as $mid) {

@@ -161,22 +161,19 @@ END;
                     'COUNT(*) AS number',
                     $attribute['id'] . ' AS attributeid, lu.userid AS userid, now() AS value',
                 ) as $select) {
-                $q = "SELECT $select
+                $q =
+                    "SELECT $select
                     FROM {$this->tables['autoresponders']} ar
-                        INNER JOIN {$this->tables['message']} m ON ar.mid = m.id
-                        INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
-                        INNER JOIN {$this->tables['listuser']} lu ON lm.listid = lu.listid
-                        INNER JOIN {$this->tables['user']} u ON u.id = lu.userid AND u.confirmed = 1 AND u.blacklisted = 0
-                        LEFT JOIN {$this->tables['usermessage']} um ON lu.userid = um.userid AND um.messageid = m.id
-                        WHERE ar.id = {$ar['id']}";
-
-                if ($ar['new']) {
-                    $q .= ' AND lu.modified > ar.entered';
-                }
-
-                $q .= ' AND (UNIX_TIMESTAMP(lu.modified) + (ar.mins * 60)) < UNIX_TIMESTAMP(now())
-                      AND um.userid IS NULL
-                      GROUP BY lu.userid';
+                    INNER JOIN {$this->tables['message']} m ON ar.mid = m.id
+                    INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
+                    INNER JOIN {$this->tables['listuser']} lu ON lm.listid = lu.listid
+                    INNER JOIN {$this->tables['user']} u ON u.id = lu.userid AND u.confirmed = 1 AND u.blacklisted = 0
+                    LEFT JOIN {$this->tables['usermessage']} um ON lu.userid = um.userid AND um.messageid = m.id
+                    WHERE ar.id = {$ar['id']}
+                    AND (ar.new = 0 || ar.new = 1 && lu.modified > ar.entered)
+                    AND (UNIX_TIMESTAMP(lu.modified) + (ar.mins * 60)) < UNIX_TIMESTAMP(now())
+                    AND um.userid IS NULL
+                    GROUP BY lu.userid";
 
                 $qs[] = $q;
             }
@@ -277,11 +274,11 @@ END;
             SELECT
                 ar.*,
                 m.subject,
-                    GROUP_CONCAT(
-                        DISTINCT CONCAT('"', l.name, '"')
-                        ORDER BY l.name
-                        SEPARATOR ', '
-                    ) AS list_names,
+                GROUP_CONCAT(
+                    DISTINCT CONCAT('"', l.name, '"')
+                    ORDER BY l.name
+                    SEPARATOR ', '
+                ) AS list_names,
                 l2.name AS addlist,
                 ($subQuery) AS pending
             FROM {$this->tables['autoresponders']} ar

@@ -52,6 +52,8 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    2.3.0+20160304  Process autoresponders is now performed automatically
+                    Display the number of ready subscribers for an autoresponder
     2.2.2+20160226  Leave campaign at sent status
     2.2.1+20151020  Internal change to avoid php strict warning
     2.2.0+20150821  Filter autoresponders, added description field
