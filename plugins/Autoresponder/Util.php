@@ -1,6 +1,6 @@
 <?php
 /**
- * Autoresponder plugin for phplist
+ * Autoresponder plugin for phplist.
  *
  * This plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,11 @@
  * GNU General Public License for more details.
  *
  * @category  phplist
- * @package   Autoresponder
+ *
  * @author    Cameron Lerch (Sponsored by Brightflock -- http://brightflock.com)
  * @copyright 2013 Cameron Lerch
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
+ *
  * @link      http://brightflock.com
  */
 class Autoresponder_Util
@@ -23,22 +24,22 @@ class Autoresponder_Util
     public static function formatMinutes($mins)
     {
         if (is_int($years = $mins / 60 / 24 / 7 / 52)) {
-            return $years . ' year' . ($years <> 1 ? 's' : '');
+            return $years . ' year' . ($years != 1 ? 's' : '');
         }
 
         if (is_int($weeks = $mins / 60 / 24 / 7)) {
-            return $weeks . ' week' . ($weeks <> 1 ? 's' : '');
+            return $weeks . ' week' . ($weeks != 1 ? 's' : '');
         }
 
         if (is_int($days = $mins / 60 / 24)) {
-            return $days . ' day' . ($days <> 1 ? 's' : '');
+            return $days . ' day' . ($days != 1 ? 's' : '');
         }
 
         if (is_int($hours = $mins / 60)) {
-            return $hours . ' hour' . ($hours <> 1 ? 's' : '');
+            return $hours . ' hour' . ($hours != 1 ? 's' : '');
         }
 
-        return $mins . ' minute' . ($mins <> 1 ? 's' : '');
+        return $mins . ' minute' . ($mins != 1 ? 's' : '');
     }
 
     public static function pluginRedirect($page = '')

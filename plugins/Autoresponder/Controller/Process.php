@@ -1,6 +1,6 @@
 <?php
 /**
- * Autoresponder plugin for phplist
+ * Autoresponder plugin for phplist.
  *
  * This plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,11 @@
  * GNU General Public License for more details.
  *
  * @category  phplist
- * @package   Autoresponder
+ *
  * @author    Cameron Lerch (Sponsored by Brightflock -- http://brightflock.com)
  * @copyright 2013 Cameron Lerch
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
+ *
  * @link      http://brightflock.com
  */
 class Autoresponder_Controller_Process extends CommonPlugin_Controller
@@ -31,7 +32,7 @@ class Autoresponder_Controller_Process extends CommonPlugin_Controller
     {
         global $plugins;
 
-        if ($GLOBALS["commandline"]) {
+        if ($GLOBALS['commandline']) {
             ob_end_clean();
             print ClineSignature();
             ob_start();
@@ -50,10 +51,10 @@ class Autoresponder_Controller_Process extends CommonPlugin_Controller
         if (count($messageIds) > 0) {
             echo sprintf('campaigns submitted: %s', implode(', ', $messageIds));
         } else {
-            echo "no campaigns submitted";
+            echo 'no campaigns submitted';
         }
 
-        if ($GLOBALS["commandline"]) {
+        if ($GLOBALS['commandline']) {
             ob_flush();
         }
     }

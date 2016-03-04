@@ -1,6 +1,6 @@
 <?php
 /**
- * Autoresponder plugin for phplist
+ * Autoresponder plugin for phplist.
  *
  * This plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,11 @@
  * GNU General Public License for more details.
  *
  * @category  phplist
- * @package   Autoresponder
+ *
  * @author    Cameron Lerch (Sponsored by Brightflock -- http://brightflock.com)
  * @copyright 2013 Cameron Lerch
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
+ *
  * @link      http://brightflock.com
  */
 class Autoresponder extends phplistPlugin
@@ -71,15 +72,15 @@ class Autoresponder extends phplistPlugin
             array(
                 'page' => 'process',
                 'frequency' => 60,
-            )
+            ),
         );
     }
 
     /**
      * Hook for when process queue is run
-     * Submits any autoresponder campaigns that are pending
+     * Submits any autoresponder campaigns that are pending.
      *
-     * @return  none
+     * @return none
      */
     public function processQueueStart()
     {
@@ -87,7 +88,7 @@ class Autoresponder extends phplistPlugin
 
         $level = error_reporting(-1);
 
-        $dao = new Autoresponder_DAO;
+        $dao = new Autoresponder_DAO();
         $dao->setLastProcess();
 
         $messageIds = $dao->setPending();
@@ -103,20 +104,20 @@ class Autoresponder extends phplistPlugin
     /**
      * Hook for when a message has been sent to a user
      * If the message is an autoresponder and a list has been specified then
-     * add the user to that list
+     * add the user to that list.
      *
-     * @access  public
-     * @param   int  $messageId the message id
-     * @param   array  $userdata array of user data
-     * @param   bool  $isTestMail whether sending a test email
-     * @return  none
+     * @param int   $messageId  the message id
+     * @param array $userdata   array of user data
+     * @param bool  $isTestMail whether sending a test email
+     *
+     * @return none
      */
     public function processSendSuccess($messageId, $userdata, $isTestMail = false)
     {
         if ($isTestMail) {
             return;
         }
-        $dao = new Autoresponder_DAO;
+        $dao = new Autoresponder_DAO();
 
         if (!($ar = $dao->getAutoresponderForMessage($messageId))) {
             return;
@@ -132,7 +133,7 @@ class Autoresponder extends phplistPlugin
         if ($dao->addSubscriberToList($listId, $userdata['id'])) {
             addUserHistory(
                 $userdata['email'],
-                "Added to list automatically",
+                'Added to list automatically',
                 "Added to list $listId by autoresponder $autoId, message $messageId"
             );
         }
@@ -140,17 +141,17 @@ class Autoresponder extends phplistPlugin
 
     /**
      * Hook for displaying fields when a message is viewed
-     * If the message has an autoresponder then display a link to the autoresponder page
+     * If the message has an autoresponder then display a link to the autoresponder page.
      *
-     * @access  public
-     * @param   int  $messageId the message id
-     * @param   array  $userdata array of user data
-     * @return  array|false caption and html to be added, or false if the
-     *          message does not have an autoresponder
+     * @param int   $messageId the message id
+     * @param array $userdata  array of user data
+     *
+     * @return array|false caption and html to be added, or false if the
+     *                     message does not have an autoresponder
      */
     public function viewMessage($messageId, array $data)
     {
-        $dao = new Autoresponder_DAO;
+        $dao = new Autoresponder_DAO();
 
         if (!($ar = $dao->getAutoresponderForMessage($messageId))) {
             return false;
@@ -165,6 +166,7 @@ class Autoresponder extends phplistPlugin
     <br />
     $description
 END;
+
         return array('Autoresponder', $html);
     }
 }

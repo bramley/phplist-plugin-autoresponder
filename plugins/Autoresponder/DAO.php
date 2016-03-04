@@ -1,6 +1,6 @@
 <?php
 /**
- * Autoresponder plugin for phplist
+ * Autoresponder plugin for phplist.
  *
  * This plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,11 @@
  * GNU General Public License for more details.
  *
  * @category  phplist
- * @package   Autoresponder
+ *
  * @author    Cameron Lerch (Sponsored by Brightflock -- http://brightflock.com)
  * @copyright 2013 Cameron Lerch
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
+ *
  * @link      http://brightflock.com
  */
 use phpList\plugin\Common;
@@ -24,10 +25,9 @@ class Autoresponder_DAO extends Common\DAO
 {
     /**
      * Create the database table
-     * Upgrade the table by adding the addlistid column
+     * Upgrade the table by adding the addlistid column.
      *
-     * @access  private
-     * @return  none
+     * @return none
      */
     private function init()
     {
@@ -49,7 +49,7 @@ class Autoresponder_DAO extends Common\DAO
 
         $r = Sql_Query("SHOW COLUMNS FROM {$this->tables['autoresponders']} LIKE 'addlistid'");
 
-        if (!(bool)Sql_Num_Rows($r)) {
+        if (!(bool) Sql_Num_Rows($r)) {
             $sql = <<<END
                 ALTER TABLE {$this->tables['autoresponders']}
                 ADD COLUMN addlistid INT(11) AFTER mins
@@ -60,7 +60,7 @@ END;
 
         $r = Sql_Query("SHOW COLUMNS FROM {$this->tables['autoresponders']} LIKE 'description'");
 
-        if (!(bool)Sql_Num_Rows($r)) {
+        if (!(bool) Sql_Num_Rows($r)) {
             $sql = <<<END
                 ALTER TABLE {$this->tables['autoresponders']}
                 ADD COLUMN description VARCHAR(255) DEFAULT '' AFTER id
@@ -82,6 +82,7 @@ END;
             "SELECT * FROM {$this->tables['attribute']}
             WHERE name = '$name'"
         );
+
         return Sql_Fetch_Array($res);
     }
 
@@ -98,9 +99,10 @@ END;
 
     /**
      * Gets either all available draft messages or a specific message, used when editing an autoresponder.
+     *
      * @param int $mid specific message id
+     *
      * @return array associative array indexed by message id
-     * @access public
      */
     public function getPossibleMessages($mid)
     {
@@ -157,7 +159,7 @@ END;
             foreach (
                 array(
                     'COUNT(*) AS number',
-                    $attribute['id'] . ' AS attributeid, lu.userid AS userid, now() AS value'
+                    $attribute['id'] . ' AS attributeid, lu.userid AS userid, now() AS value',
                 ) as $select) {
                 $q = "SELECT $select
                     FROM {$this->tables['autoresponders']} ar
@@ -169,12 +171,12 @@ END;
                         WHERE ar.id = {$ar['id']}";
 
                 if ($ar['new']) {
-                    $q .= " AND lu.modified > ar.entered";
+                    $q .= ' AND lu.modified > ar.entered';
                 }
 
-                $q .= " AND (UNIX_TIMESTAMP(lu.modified) + (ar.mins * 60)) < UNIX_TIMESTAMP(now())
+                $q .= ' AND (UNIX_TIMESTAMP(lu.modified) + (ar.mins * 60)) < UNIX_TIMESTAMP(now())
                       AND um.userid IS NULL
-                      GROUP BY lu.userid";
+                      GROUP BY lu.userid';
 
                 $qs[] = $q;
             }
@@ -199,6 +201,7 @@ END;
                     Sql_Query('COMMIT');
                 } catch (Exception $e) {
                     Sql_Query('ROLLBACK');
+
                     return false;
                 }
             }
@@ -218,6 +221,7 @@ END;
                 'id'
             );
         }
+
         return $names;
     }
 
@@ -233,6 +237,7 @@ END;
                 JOIN {$this->tables['autoresponders']} ar ON ar.mid = lm.messageid";
             $names = $this->dbCommand->queryColumn($sql, 'name', 'id');
         }
+
         return $names;
     }
 
@@ -242,6 +247,7 @@ END;
             "SELECT ar.*
             FROM {$this->tables['autoresponders']} ar
             WHERE ar.id = $id";
+
         return $this->dbCommand->queryRow($sql);
     }
 
@@ -335,6 +341,7 @@ END;
 
             return false;
         }
+
         return true;
     }
 
@@ -395,6 +402,7 @@ END;
             Sql_Query('COMMIT');
         } catch (Exception $e) {
             Sql_Query('ROLLBACK');
+
             return false;
         }
 
@@ -402,12 +410,12 @@ END;
     }
 
     /**
-     * Return the autoresponder, if there is one, for a message
+     * Return the autoresponder, if there is one, for a message.
      *
-     * @access  public
-     * @param   int  $messageId the message id
-     * @return  array the fields for the autoresponder
-     *          or false if there is no autoresponder for the message
+     * @param int $messageId the message id
+     *
+     * @return array the fields for the autoresponder
+     *               or false if there is no autoresponder for the message
      */
     public function getAutoresponderForMessage($messageId)
     {
@@ -424,12 +432,12 @@ END
     }
 
     /**
-     * Add a subscriber to a list
+     * Add a subscriber to a list.
      *
-     * @access  public
-     * @param   int  $listId the list id
-     * @param   int  $userId the user id
-     * @return  int  the number of rows added, 0 or 1
+     * @param int $listId the list id
+     * @param int $userId the user id
+     *
+     * @return int the number of rows added, 0 or 1
      */
     public function addSubscriberToList($listId, $userId)
     {

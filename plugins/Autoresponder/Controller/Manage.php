@@ -1,6 +1,6 @@
 <?php
 /**
- * Autoresponder plugin for phplist
+ * Autoresponder plugin for phplist.
  *
  * This plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +12,11 @@
  * GNU General Public License for more details.
  *
  * @category  phplist
- * @package   Autoresponder
+ *
  * @author    Cameron Lerch (Sponsored by Brightflock -- http://brightflock.com)
  * @copyright 2013 Cameron Lerch
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
+ *
  * @link      http://brightflock.com
  */
 class Autoresponder_Controller_Manage extends CommonPlugin_Controller
@@ -33,6 +34,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
     private function delayInMinutes($delay)
     {
         $now = time();
+
         return (strtotime($delay, $now) - $now) / 60;
     }
 
@@ -41,8 +43,8 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
      * Includes an optional specific message, for use when editing an autoresponder.
      * 
      * @param int $mid additional message to include in the results
+     *
      * @return array select list data, message id => description
-     * @access public
      */
     private function messageListData($mid)
     {
@@ -62,31 +64,31 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
             $data[$i] = Autoresponder_Util::formatMinutes($i);
         }
 
-        for ($i = 1; $i < 24; $i++) {
+        for ($i = 1; $i < 24; ++$i) {
             $data[60 * $i] = Autoresponder_Util::formatMinutes(60 * $i);
         }
 
-        for ($i = 1; $i < 7; $i++) {
+        for ($i = 1; $i < 7; ++$i) {
             $data[1440 * $i] = Autoresponder_Util::formatMinutes(1440 * $i);
         }
 
-        for ($i = 1; $i < 52; $i++) {
+        for ($i = 1; $i < 52; ++$i) {
             $data[10080 * $i] = Autoresponder_Util::formatMinutes(10080 * $i);
         }
 
-        for ($i = 1; $i < 6; $i++) {
+        for ($i = 1; $i < 6; ++$i) {
             $data[524160 * $i] = Autoresponder_Util::formatMinutes(524160 * $i);
         }
+
         return $data;
     }
 
     /**
-     * Displays a filter by list and listing of autoresponders
+     * Displays a filter by list and listing of autoresponders.
      * 
      * @param array $params Additonal parameters, currently only error messages
      * 
      * @return string The generated HTML
-     * @access private
      */
     private function displayAutoresponders(array $params = array())
     {
@@ -117,8 +119,9 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         $vars = array(
             'errors' => $errors,
             'filter' => $listSelect,
-            'listing' => $listing->display()
+            'listing' => $listing->display(),
         );
+
         return $this->render(__DIR__ . '/../View/listingview.tpl.php', $vars);
     }
 
@@ -128,12 +131,11 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
      * When editing the existing autoresponder values are used, and the message id cannot
      * be changed.
      * 
-     * @param array $params Defaults for a new ar or current values for an existing ar
-     * @param boolean $disable Whether to disable the message select list, when editing
-     * an autoresponder
+     * @param array $params  Defaults for a new ar or current values for an existing ar
+     * @param bool  $disable Whether to disable the message select list, when editing
+     *                       an autoresponder
      * 
      * @return string The generated HTML for the form
-     * @access private
      */
     private function displayform($params)
     {
@@ -156,7 +158,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
             'addlist',
             $params['addlistid'],
             $this->dao->getListNames(),
-            array('prompt' => 'Select ...' )
+            array('prompt' => 'Select ...')
         );
 
         if (isset($_SESSION['autoresponder_errors'])) {
@@ -173,7 +175,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         $vars = array(
             'description' => CHtml::textField('description', $params['description']),
             'messages' => CHtml::dropDownList('mid', $mid, $this->messageListData($mid), array('prompt' => 'Select ...')),
-            'mins' => CHtml::dropDownList('mins', $minsSelected, $delayData, array('prompt' => 'Select ...' )),
+            'mins' => CHtml::dropDownList('mins', $minsSelected, $delayData, array('prompt' => 'Select ...')),
             'delay' => CHtml::textField('delay', $delay),
             'lists' => $listSelect,
             'newOnly' => CHtml::checkbox('new', $params['new']),
@@ -182,6 +184,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
             'title' => $params['title'],
             'errors' => $errors,
         );
+
         return $this->render(__DIR__ . '/../View/formview.tpl.php', $vars);
     }
 
@@ -211,6 +214,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
             }
             $values['title'] = 'Add Autoresponder';
             echo $this->displayform($values);
+
             return;
         }
 
@@ -257,7 +261,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
                 'mid' => $_POST['mid'],
                 'mins' => $delayMinutes,
                 'addlistid' => $addListId,
-                'new' => $newOnly
+                'new' => $newOnly,
             );
         } else {
             $errors[] = 'Autoresponder added';
@@ -279,6 +283,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
             }
             $values['title'] = 'Amend Autoresponder';
             echo $this->displayform($values);
+
             return;
         }
 
@@ -325,7 +330,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
                 'mid' => $_POST['mid'],
                 'mins' => $delayMinutes,
                 'addlistid' => $addListId,
-                'new' => $newOnly
+                'new' => $newOnly,
             );
         } else {
             $errors[] = "Autoresponder {$_GET['id']} amended";
