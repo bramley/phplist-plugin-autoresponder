@@ -18,6 +18,17 @@
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
  * @link      http://brightflock.com
  */
+global $pagefooter;
+
+$pagefooter[basename(__FILE__)] = <<<'END'
+<script type="text/javascript">
+$(function() {
+    $('.autosubmit').change(function() {
+        this.form.submit();
+    });
+});
+</script>
+END;
 ?>
 <div class="ar-admin">
     <?php if ($errors) { ?>
@@ -29,8 +40,18 @@
             </div>
         </div>
     <?php } ?>
-    <div class="ar-admin-current" style="padding-top: 10px;">
-    <?php echo $panel; ?>
+    <div class="panel">
+        <div class="header"><h2>Filter</h2></div>
+        <div class="content">
+            <div class="ar-admin-current" style="padding-top: 10px;">
+                <form method="GET" action="">
+                    <input type="hidden" value=<?php echo $_GET['page']; ?>  name="page" id="page" />
+                    <input type="hidden" value=<?php echo $_GET['pi']; ?>  name="pi" id="pi" />
+                    <label>Filter by list
+    <?php echo $filter; ?></label>
+                </form>
+            </div>
+        </div>
     </div>
     <div class="ar-admin-current" style="padding-top: 10px;">
     <?php echo $listing; ?>

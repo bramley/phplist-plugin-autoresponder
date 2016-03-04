@@ -114,16 +114,9 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
                 $errors = array();
             }
         }
-        $panel = new UIPanel(
-            $this->i18n->get('Filter'),
-            $this->render(
-                __DIR__ . '/../filterview.tpl.php',
-                array('filter' => $listSelect)
-            )
-        );
         $vars = array(
             'errors' => $errors,
-            'panel' => $panel->display(),
+            'filter' => $listSelect,
             'listing' => $listing->display()
         );
         return $this->render(__DIR__ . '/../listingview.tpl.php', $vars);
