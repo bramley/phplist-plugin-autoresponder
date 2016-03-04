@@ -89,8 +89,6 @@ class Autoresponder extends phplistPlugin
         $level = error_reporting(-1);
 
         $dao = new Autoresponder_DAO();
-        $dao->setLastProcess();
-
         $messageIds = $dao->setPending();
 
         foreach ($messageIds as $mid) {

@@ -1,3 +1,6 @@
+version 2.3.1+20160304
+      Fix call to non-existent method
+
 version 2.3.0+20160304
       Simplify use of panels
       Handle pending autoresponders within process queue hook instead of as a page
