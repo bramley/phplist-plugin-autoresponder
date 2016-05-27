@@ -1,3 +1,6 @@
+version 2.3.2+20160527
+      Add class map
+
 version 2.3.1+20160304
       Fix call to non-existent method
 

@@ -52,6 +52,7 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    2.3.2+20160527  Add class map for autoloading
     2.3.1+20160304  Fix bug in previous version
     2.3.0+20160304  Process autoresponders is now performed automatically
                     Display the number of ready subscribers for an autoresponder
