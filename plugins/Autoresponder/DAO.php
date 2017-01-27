@@ -154,6 +154,12 @@ END;
                 continue;
             }
             $attribute = $this->getAttribute($ar['id']);
+
+            if (!$attribute) {
+                logEvent("Attribute for autoresponder {$ar['id']} does not exist.");
+                continue;
+            }
+   
             $qs = array();
 
             foreach (
