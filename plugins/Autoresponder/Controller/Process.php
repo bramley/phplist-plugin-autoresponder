@@ -34,7 +34,7 @@ class Autoresponder_Controller_Process extends CommonPlugin_Controller
 
         if ($GLOBALS['commandline']) {
             ob_end_clean();
-            print ClineSignature();
+            echo ClineSignature();
             ob_start();
         }
 

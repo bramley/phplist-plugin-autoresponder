@@ -1,19 +1,17 @@
 <?php
 
-$finder = Symfony\CS\Finder\DefaultFinder::create()
+$finder = PhpCsFixer\Finder::create()
     ->in(__DIR__)
-    ->exclude('plugins/Autoresponder/View')
+    ->exclude(['plugins/Autoresponder/View'])
 ;
 
-return Symfony\CS\Config\Config::create()
-    ->setUsingCache(true)
-    ->fixers(array(
-        'symfony',
-        'psr0', 'psr1', 'psr2',
-        'encoding', 'braces', 'elseif', 'space', 'function_declaration', 'indentation', 'line_after_namespace',
-        'linefeed', 'lowercase_constants', 'lowercase_keywords', 'method_argument_space', 'multiple_use', 'parenthesis', 'php_closing_tag',
-        'single_line_after_imports', 'trailing_spaces', 'visibility',
-        '-concat_without_spaces'
+return PhpCsFixer\Config::create()
+    ->setRules(array(
+        '@PSR1' => true,
+        '@PSR2' => true,
+        '@Symfony' => true,
+        'concat_space' => false,
+        'phpdoc_no_alias_tag' => false,
     ))
-    ->finder($finder)
+    ->setFinder($finder)
 ;

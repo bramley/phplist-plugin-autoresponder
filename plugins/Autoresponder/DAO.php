@@ -159,7 +159,7 @@ END;
                 logEvent("Attribute for autoresponder {$ar['id']} does not exist.");
                 continue;
             }
-   
+
             $qs = array();
 
             foreach (

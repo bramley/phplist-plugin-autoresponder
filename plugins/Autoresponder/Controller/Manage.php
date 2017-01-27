@@ -41,7 +41,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
     /**
      * Creates array for use in select element
      * Includes an optional specific message, for use when editing an autoresponder.
-     * 
+     *
      * @param int $mid additional message to include in the results
      *
      * @return array select list data, message id => description
@@ -85,9 +85,9 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
 
     /**
      * Displays a filter by list and listing of autoresponders.
-     * 
+     *
      * @param array $params Additonal parameters, currently only error messages
-     * 
+     *
      * @return string The generated HTML
      */
     private function displayAutoresponders(array $params = array())
@@ -130,11 +130,11 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
      * When adding default values are provided
      * When editing the existing autoresponder values are used, and the message id cannot
      * be changed.
-     * 
+     *
      * @param array $params  Defaults for a new ar or current values for an existing ar
      * @param bool  $disable Whether to disable the message select list, when editing
      *                       an autoresponder
-     * 
+     *
      * @return string The generated HTML for the form
      */
     private function displayform($params)
