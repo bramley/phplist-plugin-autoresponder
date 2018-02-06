@@ -36,22 +36,22 @@
             </div>
             <div class="content">
                 <form id="ar-admin-new-form" method="post">
-                        <label>Description:</label>
+                        <label><?= s('Description')?>:</label>
                         <?php echo $description; ?>
-                        <label>Select the draft message to send:</label>
+                        <label><?= s('Select the draft message to send')?>:</label>
                         <?php echo $messages; ?>
-                        <p>Create further available messages by adding draft messages to phplist</p>
-                        <label>Select a delay:</label>
-                        <p>Ater a subscription, how long to wait until sending the autoresponder email to the subscriber</p>
+                        <p><?= s('Create further available messages by adding draft messages to phplist')?></p>
+                        <label><?= s('Select a delay')?>:</label>
+                        <p><?= s('After a subscription, how long to wait until sending the autoresponder email to the subscriber')?></p>
                         <?php echo $mins; ?>
-                        <label>Or enter another value (e.g. 16 days):</label>
+                        <label><?= s('Or enter another value (e.g. 16 days)')?>:</label>
                         <?php echo $delay; ?>
-                        <label>Actions:</label>
-                        <p>Add each subscriber to another list when the autoresponder has been sent</p>
+                        <label><?= s('Actions')?>:</label>
+                        <p><?= s('Add each subscriber to another list when the autoresponder has been sent')?></p>
                         <?php echo $lists; ?>
                     <fieldset>
                         <?php echo $newOnly; ?>
-                        <span>Only send to new users (keep checked unless you know what you are doing!)</span>
+                        <span><?= s('Only send to new users (keep checked unless you know what you are doing!)')?></span>
                     </fieldset>
                         <?php echo $submit; ?>
                         <?php echo $cancel; ?>

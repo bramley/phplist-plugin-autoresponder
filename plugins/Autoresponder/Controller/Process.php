@@ -47,9 +47,9 @@ class Autoresponder_Controller_Process extends CommonPlugin_Controller
         }
 
         if (count($messageIds) > 0) {
-            echo sprintf('campaigns submitted: %s', implode(', ', $messageIds));
+            echo s('campaigns submitted: %s', implode(', ', $messageIds));
         } else {
-            echo 'no campaigns submitted';
+            echo s('no campaigns submitted');
         }
 
         if ($GLOBALS['commandline']) {

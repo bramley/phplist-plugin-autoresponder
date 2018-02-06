@@ -31,9 +31,6 @@ class Autoresponder extends phplistPlugin
     public $topMenuLinks = array(
         'manage' => array('category' => 'campaigns'),
     );
-    public $pageTitles = array(
-        'manage' => 'Manage autoresponders',
-    );
     public $documentationUrl = 'https://resources.phplist.com/plugin/autoresponder_3.x';
 
     public function __construct()
@@ -43,6 +40,13 @@ class Autoresponder extends phplistPlugin
             ? file_get_contents($f)
             : '';
         parent::__construct();
+    }
+
+    public function activate()
+    {
+        $this->pageTitles = array(
+            'manage' => s('Manage autoresponders'),
+        );
     }
 
     public function adminmenu()

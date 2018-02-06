@@ -35,20 +35,21 @@ class Autoresponder_Populator implements CommonPlugin_IPopulator
         foreach ($this->autoresponders as $item) {
             $enableLink = new CommonPlugin_PageLink(
                 new CommonPlugin_PageURL(null, array('action' => 'enable', 'id' => $item['id'])),
-                $item['enabled'] ? 'yes' : 'no'
+                $item['enabled'] ? s('yes') : s('no')
             );
+            $prompt = s('Delete autoresponder %d, are you sure?', $item['id']);
             $deleteLink = new CommonPlugin_PageLink(
                 new CommonPlugin_PageURL(null, array('action' => 'delete', 'id' => $item['id'])),
-                'delete',
-                array('onclick' => "return confirm('Delete autoresponder {$item['id']}, are you sure?')")
+                s('Delete'),
+                array('onclick' => "return confirm('$prompt')")
             );
             $delay = Autoresponder_Util::formatMinutes($item['mins']);
             $key = $item['id'];
             $w->addElement($key, new CommonPlugin_PageURL(null, array('action' => 'edit', 'id' => $item['id'])));
-            $w->addRow($key, 'Description', $item['description']);
+            $w->addRow($key, s('Description'), $item['description']);
             $w->addRowHtml(
                 $key,
-                'Campaign',
+                s('Campaign'),
                 new CommonPlugin_PageLink(
                     new CommonPlugin_PageURL('message', array('id' => $item['mid'])),
                     $item['mid'] . ' | ' . htmlspecialchars($item['subject'])
@@ -56,20 +57,20 @@ class Autoresponder_Populator implements CommonPlugin_IPopulator
             );
             $w->addRow(
                 $key,
-                'Autoresponder email will be sent',
-                sprintf('%s after subscription to %s', $delay, $item['list_names'])
+                s('Autoresponder email will be sent'),
+                s('%s after subscription to %s', $delay, $item['list_names'])
             );
 
             if ($item['addlist']) {
-                $w->addRow($key, 'After sending, add subscriber to', $item['addlist']);
+                $w->addRow($key, s('After sending, add subscriber to'), $item['addlist']);
             }
-            $w->addRow($key, 'Subscribers ready to be sent', $item['pending']);
-            $w->addColumn($key, 'Added', $item['entered']);
-            $w->addColumn($key, 'New only', $item['new'] ? 'yes' : 'no');
-            $w->addColumnHtml($key, 'Enabled', $enableLink);
-            $w->addColumnHtml($key, 'Delete', $deleteLink);
+            $w->addRow($key, s('Subscribers ready to be sent'), $item['pending']);
+            $w->addColumn($key, s('Added'), $item['entered']);
+            $w->addColumn($key, s('New only'), $item['new'] ? 'yes' : 'no');
+            $w->addColumnHtml($key, s('Enabled'), $enableLink);
+            $w->addColumnHtml($key, s('Delete'), $deleteLink);
         }
-        $w->addButton('Add', new CommonPlugin_PageURL(null, array('action' => 'add')));
+        $w->addButton(s('Add'), new CommonPlugin_PageURL(null, array('action' => 'add')));
     }
 
     public function total()
