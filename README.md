@@ -15,7 +15,7 @@ is due.
 
 ### Dependencies ###
 
-Requires php version 5.3 or later.
+Requires php version 5.4 or later.
 
 This plugin requires the Common Plugin v3 to also be installed, and will not work without that.
 **You must install that plugin or upgrade to the latest version if it is already installed**.
@@ -47,11 +47,12 @@ This should contain
 
 ##Usage##
 
-For guidance on usage see the plugin page within the phplist documentation site <https://resources.phplist.com/plugin/autoresponder_3.x>
+For guidance on usage see the plugin page within the phplist documentation site <https://resources.phplist.com/plugin/autoresponder>
 
 ## Version history ##
 
     version         Description
+    3.0.0+20180210  Rework method of selecting subscribers
     2.3.3+20170127  Improve handling of missing attribute
     2.3.2+20160527  Add class map for autoloading
     2.3.1+20160304  Fix bug in previous version

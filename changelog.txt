@@ -1,3 +1,10 @@
+version 3.0.0+20180210
+      Make text translateable
+      Rework method of selecting subscribers
+      Use namespaces
+      Update message table when upgrading plugin to version 3
+      Update file licence header
+
 version 2.3.3+20170127
       Improve handling of missing attribute.
       Coding standards changes.

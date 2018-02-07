@@ -1,10 +1,9 @@
 <?php
 
 return array(
-    'Autoresponder_ControllerFactory' => $base . '/Autoresponder/ControllerFactory.php',
-    'Autoresponder_Controller_Manage' => $base . '/Autoresponder/Controller/Manage.php',
-    'Autoresponder_Controller_Process' => $base . '/Autoresponder/Controller/Process.php',
-    'Autoresponder_DAO' => $base . '/Autoresponder/DAO.php',
-    'Autoresponder_Populator' => $base . '/Autoresponder/Populator.php',
-    'Autoresponder_Util' => $base . '/Autoresponder/Util.php',
+    'phpList\plugin\Autoresponder\ControllerFactory' => $base . '/Autoresponder/ControllerFactory.php',
+    'phpList\plugin\Autoresponder\Controller\Manage' => $base . '/Autoresponder/Controller/Manage.php',
+    'phpList\plugin\Autoresponder\DAO' => $base . '/Autoresponder/DAO.php',
+    'phpList\plugin\Autoresponder\Populator' => $base . '/Autoresponder/Populator.php',
+    'phpList\plugin\Autoresponder\Util' => $base . '/Autoresponder/Util.php',
 );

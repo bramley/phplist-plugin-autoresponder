@@ -14,12 +14,17 @@
  * @category  phplist
  *
  * @author    Cameron Lerch (Sponsored by Brightflock -- http://brightflock.com)
- * @copyright 2013 Cameron Lerch
+ * @copyright 2013-2018 Cameron Lerch
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
  *
  * @link      http://brightflock.com
  */
-class Autoresponder_Util
+
+namespace phpList\plugin\Autoresponder;
+
+use phpList\plugin\Common\PageURL;
+
+class Util
 {
     public static function formatMinutes($mins)
     {
@@ -44,7 +49,7 @@ class Autoresponder_Util
 
     public static function pluginRedirect($page = '')
     {
-        header('Location: ' . new CommonPlugin_PageURL($page));
+        header('Location: ' . new PageURL($page));
         exit;
     }
 }

@@ -2,30 +2,31 @@
 /**
  * Autoresponder plugin for phplist.
  *
- * This plugin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * This plugin is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is a part of Autoresponder Plugin.
  *
  * @category  phplist
  *
- * @author    Cameron Lerch (Sponsored by Brightflock -- http://brightflock.com)
- * @copyright 2013 Cameron Lerch
+ * @author    Duncan Cameron, Cameron Lerch (Sponsored by Brightflock -- http://brightflock.com)
+ * @copyright 2013-2018 Duncan Cameron
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
- *
- * @link      http://brightflock.com
  */
-class Autoresponder_Controller_Manage extends CommonPlugin_Controller
+
+namespace phpList\plugin\Autoresponder\Controller;
+
+use phpList\plugin\Autoresponder\DAO;
+use phpList\plugin\Autoresponder\Populator;
+use phpList\plugin\Autoresponder\Util;
+use phpList\plugin\Common\Controller;
+use phpList\plugin\Common\DAO\Lists as ListDao;
+use phpList\plugin\Common\Listing;
+use phpList\plugin\Common\PageLink;
+use phpList\plugin\Common\PageURL;
+use CHtml;
+
+class Manage extends Controller
 {
     private $dao;
 
-    /*
-     *    Private methods
-     */
     private function isValidDelay($delay)
     {
         return preg_match('/^\d+\s+(minute|hour|day|week|year)s?$/', $delay);
@@ -61,23 +62,23 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         $data = array();
 
         for ($i = 5; $i < 60; $i += 5) {
-            $data[$i] = Autoresponder_Util::formatMinutes($i);
+            $data[$i] = Util::formatMinutes($i);
         }
 
         for ($i = 1; $i < 24; ++$i) {
-            $data[60 * $i] = Autoresponder_Util::formatMinutes(60 * $i);
+            $data[60 * $i] = Util::formatMinutes(60 * $i);
         }
 
         for ($i = 1; $i < 7; ++$i) {
-            $data[1440 * $i] = Autoresponder_Util::formatMinutes(1440 * $i);
+            $data[1440 * $i] = Util::formatMinutes(1440 * $i);
         }
 
         for ($i = 1; $i < 52; ++$i) {
-            $data[10080 * $i] = Autoresponder_Util::formatMinutes(10080 * $i);
+            $data[10080 * $i] = Util::formatMinutes(10080 * $i);
         }
 
         for ($i = 1; $i < 6; ++$i) {
-            $data[524160 * $i] = Autoresponder_Util::formatMinutes(524160 * $i);
+            $data[524160 * $i] = Util::formatMinutes(524160 * $i);
         }
 
         return $data;
@@ -101,10 +102,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
             array(0 => s('All')) + $this->dao->getArListNames(),
             array('class' => 'autosubmit')
         );
-        $listing = new CommonPlugin_Listing(
-            $this,
-            new Autoresponder_Populator($this->dao->getAutoresponders($listId))
-        );
+        $listing = new Listing($this, new Populator($this->dao, $listId));
 
         if (isset($_SESSION['autoresponder_errors'])) {
             $errors = $_SESSION['autoresponder_errors'];
@@ -131,9 +129,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
      * When editing the existing autoresponder values are used, and the message id cannot
      * be changed.
      *
-     * @param array $params  Defaults for a new ar or current values for an existing ar
-     * @param bool  $disable Whether to disable the message select list, when editing
-     *                       an autoresponder
+     * @param array $params Defaults for a new ar or current values for an existing ar
      *
      * @return string The generated HTML for the form
      */
@@ -147,7 +143,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
                 $delay = '';
             } else {
                 $minsSelected = 0;
-                $delay = Autoresponder_Util::formatMinutes($params['mins']);
+                $delay = Util::formatMinutes($params['mins']);
             }
         } else {
             $minsSelected = 0;
@@ -157,7 +153,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         $listSelect = CHtml::dropDownList(
             'addlist',
             $params['addlistid'],
-            $this->dao->getListNames(),
+            array_column(iterator_to_array($this->listDao->listsForOwner(0)), 'name', 'id'),
             array('prompt' => s('Select ...'))
         );
 
@@ -171,7 +167,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         $mid = $params['mid'];
         $options = array('prompt' => 'Select ...');
 
-        $cancel = new CommonPlugin_PageLink(new CommonPlugin_PageURL(null), 'Cancel', array('class' => 'button'));
+        $cancel = new PageLink(new PageURL(null), 'Cancel', array('class' => 'button'));
         $vars = array(
             'description' => CHtml::textField('description', $params['description']),
             'messages' => CHtml::dropDownList('mid', $mid, $this->messageListData($mid), array('prompt' => s('Select ...'))),
@@ -188,9 +184,6 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
         return $this->render(__DIR__ . '/../View/formview.tpl.php', $vars);
     }
 
-    /*
-     *    Protected methods
-     */
     protected function actionDefault()
     {
         echo $this->displayAutoresponders();
@@ -250,12 +243,12 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
                 $addListId,
                 $newOnly
             )) {
-                $errors[] = s('Was unable to add autoresponder');
+                $errors[] = s('Unable to add autoresponder');
             }
         }
 
         if ($errors) {
-            header('Location: ' . new CommonPlugin_PageURL(null, array('action' => 'add')));
+            header('Location: ' . new PageURL(null, array('action' => 'add')));
             $_SESSION['autoresponder_form'] = array(
                 'description' => $_POST['description'],
                 'mid' => $_POST['mid'],
@@ -265,7 +258,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
             );
         } else {
             $errors[] = s('Autoresponder added');
-            header('Location: ' . new CommonPlugin_PageURL());
+            header('Location: ' . new PageURL());
         }
         $_SESSION['autoresponder_errors'] = $errors;
         exit;
@@ -319,12 +312,12 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
                 $addListId,
                 $newOnly
             )) {
-                $errors[] = s('Was unable to update autoresponder');
+                $errors[] = s('Unable to update autoresponder');
             }
         }
 
         if ($errors) {
-            header('Location: ' . new CommonPlugin_PageURL(null, array('action' => 'edit', 'id' => $_GET['id'])));
+            header('Location: ' . new PageURL(null, array('action' => 'edit', 'id' => $_GET['id'])));
             $_SESSION['autoresponder_form'] = array(
                 'description' => $_POST['description'],
                 'mid' => $_POST['mid'],
@@ -334,7 +327,7 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
             );
         } else {
             $errors[] = "Autoresponder {$_GET['id']} amended";
-            header('Location: ' . new CommonPlugin_PageURL());
+            header('Location: ' . new PageURL());
         }
         $_SESSION['autoresponder_errors'] = $errors;
         exit;
@@ -346,9 +339,9 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
 
         if ($id) {
             if ($this->dao->deleteAutoresponder($id)) {
-                Autoresponder_Util::pluginRedirect();
+                Util::pluginRedirect();
             }
-            $error = s('Was unable to delete autoresponder');
+            $error = s('Unable to delete autoresponder');
         } else {
             $error = s('A message id must be specified');
         }
@@ -361,21 +354,19 @@ class Autoresponder_Controller_Manage extends CommonPlugin_Controller
 
         if ($id) {
             if ($this->dao->toggleEnabled($id)) {
-                Autoresponder_Util::pluginRedirect();
+                Util::pluginRedirect();
             }
-            $error = s('Was unable to enable/disable autoresponder');
+            $error = s('Unable to enable/disable autoresponder');
         } else {
             $error = s('A message id must be specified');
         }
         echo $this->displayAutoresponders(array('errors' => array($error)));
     }
 
-    /*
-     *    Public methods
-     */
-    public function __construct()
+    public function __construct(DAO $dao, ListDao $listDao)
     {
         parent::__construct();
-        $this->dao = new Autoresponder_DAO();
+        $this->dao = $dao;
+        $this->listDao = $listDao;
     }
 }

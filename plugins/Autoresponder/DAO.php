@@ -2,26 +2,20 @@
 /**
  * Autoresponder plugin for phplist.
  *
- * This plugin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * This plugin is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is a part of Autoresponder Plugin.
  *
  * @category  phplist
  *
- * @author    Cameron Lerch (Sponsored by Brightflock -- http://brightflock.com)
- * @copyright 2013 Cameron Lerch
+ * @author    Duncan Cameron
+ * @copyright 2013-2018 Duncan Cameron
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
- *
- * @link      http://brightflock.com
  */
+
+namespace phpList\plugin\Autoresponder;
+
 use phpList\plugin\Common;
 
-class Autoresponder_DAO extends Common\DAO
+class DAO extends Common\DAO
 {
     /**
      * Create the database table
@@ -55,7 +49,6 @@ class Autoresponder_DAO extends Common\DAO
                 ADD COLUMN addlistid INT(11) AFTER mins
 END;
             Sql_Query($sql);
-            logEvent('Autoresponder plugin table upgraded');
         }
 
         $r = Sql_Query("SHOW COLUMNS FROM {$this->tables['autoresponders']} LIKE 'description'");
@@ -66,32 +59,15 @@ END;
                 ADD COLUMN description VARCHAR(255) DEFAULT '' AFTER id
 END;
             Sql_Query($sql);
-            logEvent('Autoresponder plugin table upgraded');
         }
-    }
-
-    private function attributeName($arId)
-    {
-        return "autoresponder_$arId";
-    }
-
-    private function getAttribute($arId)
-    {
-        $name = $this->attributeName($arId);
-        $res = Sql_Query(
-            "SELECT * FROM {$this->tables['attribute']}
-            WHERE name = '$name'"
-        );
-
-        return Sql_Fetch_Array($res);
     }
 
     /*
      *  Public methods
      */
-    public function __construct()
+    public function __construct($db)
     {
-        parent::__construct(new Common\DB());
+        parent::__construct($db);
 
         $this->tables['autoresponders'] = $this->table_prefix . 'autoresponders';
         $this->init();
@@ -144,88 +120,34 @@ END;
         return true;
     }
 
-    public function setPending()
+    public function submitCampaign($messageId)
     {
-        $ars = $this->getAutoresponders();
-        $messagesSubmitted = array();
+        Sql_Query(
+            "UPDATE {$this->tables['message']}
+            SET status = 'submitted'
+            WHERE (status = 'sent' OR status = 'draft') AND id = $messageId"
+        );
 
-        foreach ($ars as $ar) {
-            if (!$ar['enabled']) {
-                continue;
-            }
-            $attribute = $this->getAttribute($ar['id']);
-
-            if (!$attribute) {
-                logEvent("Attribute for autoresponder {$ar['id']} does not exist.");
-                continue;
-            }
-
-            $qs = array();
-
-            foreach (
-                array(
-                    'COUNT(*) AS number',
-                    $attribute['id'] . ' AS attributeid, lu.userid AS userid, now() AS value',
-                ) as $select) {
-                $q =
-                    "SELECT $select
-                    FROM {$this->tables['autoresponders']} ar
-                    INNER JOIN {$this->tables['message']} m ON ar.mid = m.id
-                    INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
-                    INNER JOIN {$this->tables['listuser']} lu ON lm.listid = lu.listid
-                    INNER JOIN {$this->tables['user']} u ON u.id = lu.userid AND u.confirmed = 1 AND u.blacklisted = 0
-                    LEFT JOIN {$this->tables['usermessage']} um ON lu.userid = um.userid AND um.messageid = m.id
-                    WHERE ar.id = {$ar['id']}
-                    AND (ar.new = 0 || ar.new = 1 && lu.modified > ar.entered)
-                    AND (UNIX_TIMESTAMP(lu.modified) + (ar.mins * 60)) < UNIX_TIMESTAMP(now())
-                    AND um.userid IS NULL
-                    GROUP BY lu.userid";
-
-                $qs[] = $q;
-            }
-
-            $numberReady = $this->dbCommand->queryOne($qs[0], 'number');
-
-            if ($numberReady > 0) {
-                try {
-                    Sql_Query('BEGIN');
-
-                    Sql_Query("REPLACE INTO {$this->tables['user_attribute']} " . $qs[1]);
-
-                    Sql_Query(
-                        "UPDATE {$this->tables['message']}
-                        SET status = 'submitted'
-                        WHERE (status = 'sent' OR status = 'draft') AND id = {$ar['mid']}"
-                    );
-
-                    if (Sql_Affected_Rows() > 0) {
-                        $messagesSubmitted[] = $ar['mid'];
-                    }
-                    Sql_Query('COMMIT');
-                } catch (Exception $e) {
-                    Sql_Query('ROLLBACK');
-
-                    return false;
-                }
-            }
-        }
-
-        return $messagesSubmitted;
+        return Sql_Affected_Rows() > 0;
     }
 
-    public function getListNames()
+    public function pendingSubscribers($arId)
     {
-        static $names = null;
+        $q =
+            "SELECT lu.userid AS id
+            FROM {$this->tables['autoresponders']} ar
+            INNER JOIN {$this->tables['message']} m ON ar.mid = m.id
+            INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
+            INNER JOIN {$this->tables['listuser']} lu ON lm.listid = lu.listid
+            INNER JOIN {$this->tables['user']} u ON u.id = lu.userid AND u.confirmed = 1 AND u.blacklisted = 0
+            LEFT JOIN {$this->tables['usermessage']} um ON lu.userid = um.userid AND um.messageid = m.id
+            WHERE ar.id = $arId
+            AND (ar.new = 0 || ar.new = 1 && lu.modified > ar.entered)
+            AND (UNIX_TIMESTAMP(lu.modified) + (ar.mins * 60)) < UNIX_TIMESTAMP(now())
+            AND (um.userid IS NULL OR um.status = 'not sent')
+            GROUP BY lu.userid";
 
-        if ($names === null) {
-            $names = $this->dbCommand->queryColumn(
-                "SELECT id, name FROM {$this->tables['list']}",
-                'name',
-                'id'
-            );
-        }
-
-        return $names;
+        return $this->dbCommand->queryAll($q);
     }
 
     public function getArListNames()
@@ -244,6 +166,13 @@ END;
         return $names;
     }
 
+    /**
+     * Returns the fields for one autoresponder.
+     *
+     * @param int $id autoresponder id
+     *
+     * @return array
+     */
     public function autoresponder($id)
     {
         $sql =
@@ -254,6 +183,14 @@ END;
         return $this->dbCommand->queryRow($sql);
     }
 
+    /**
+     * Returns the fields for all autoresponders or for those autoresponders whose campaigns are sent to a specific list.
+     * The result is cached as this method can be called several times.
+     *
+     * @param int $listId optional list id
+     *
+     * @return Iterator
+     */
     public function getAutoresponders($listId = 0)
     {
         static $responders = null;
@@ -261,18 +198,6 @@ END;
         if ($responders !== null) {
             return $responders;
         }
-        $subQuery =
-            "SELECT COUNT(DISTINCT lu2.userid)
-            FROM {$this->tables['message']} m2
-            INNER JOIN {$this->tables['listmessage']} lm2 ON m2.id = lm2.messageid
-            INNER JOIN {$this->tables['listuser']} lu2 ON lm2.listid = lu2.listid
-            INNER JOIN {$this->tables['user']} u2 ON u2.id = lu2.userid AND u2.confirmed = 1 AND u2.blacklisted = 0
-            LEFT JOIN {$this->tables['usermessage']} um2 ON lu2.userid = um2.userid AND um2.messageid = m2.id
-            WHERE m2.id = ar.mid
-            AND (ar.new = 0 || ar.new = 1 && lu2.modified > ar.entered)
-            AND (UNIX_TIMESTAMP(lu2.modified) + (ar.mins * 60)) < UNIX_TIMESTAMP(now())
-            AND um2.userid IS NULL";
-
         $where = ($listId > 0)
             ? "lm.listid = $listId"
             : 'lm.listid != 0';
@@ -285,8 +210,7 @@ END;
                     ORDER BY l.name
                     SEPARATOR ', '
                 ) AS list_names,
-                l2.name AS addlist,
-                ($subQuery) AS pending
+                l2.name AS addlist
             FROM {$this->tables['autoresponders']} ar
             INNER JOIN {$this->tables['message']} m ON ar.mid = m.id
             INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
@@ -310,31 +234,6 @@ END;
                 "INSERT INTO {$this->tables['autoresponders']}
                 (description, enabled, mid, mins, addlistid, new, entered)
                 VALUES ('$description', 1, $mid, $mins, $addListId, $new, now())"
-            );
-            $arId = Sql_Insert_Id();
-            $attrName = $this->attributeName($arId);
-
-            Sql_Query(
-                "INSERT INTO {$this->tables['attribute']}
-                (name, type, listorder, default_value, required, tablename)
-                VALUES ('$attrName', 'hidden', 0, '', 0, '$attrName')"
-            );
-            $attrId = Sql_Insert_Id();
-
-            $selectionQuery =
-                "SELECT ua.userid
-                FROM {$this->tables['user_attribute']} ua
-                LEFT JOIN {$this->tables['usermessage']} um ON ua.userid = um.userid AND um.messageid = $mid
-                WHERE ua.attributeid = $attrId AND ua.value != '' AND ua.value IS NOT NULL AND um.userid IS NULL";
-
-            Sql_Query(
-                sprintf(
-                    "UPDATE {$this->tables['message']}
-                    SET userselection = '%s'
-                    WHERE id = %d",
-                    sql_escape($selectionQuery),
-                    $mid
-                )
             );
 
             Sql_Query('COMMIT');
@@ -362,8 +261,6 @@ END;
 
     public function deleteAutoresponder($id)
     {
-        $attribute = $this->getAttribute($id);
-
         try {
             Sql_Query('BEGIN');
 
@@ -375,7 +272,7 @@ END;
             if ($mid) {
                 $sql =
                     "UPDATE {$this->tables['message']}
-                    SET status = 'draft', userselection = NULL
+                    SET status = 'draft'
                     WHERE id = $mid";
                 $count = $this->dbCommand->queryAffectedRows($sql);
 
@@ -389,18 +286,6 @@ END;
                 "DELETE FROM {$this->tables['autoresponders']}
                 WHERE id = $id";
             $count = $this->dbCommand->queryAffectedRows($sql);
-
-            if ($attribute) {
-                $sql =
-                    "DELETE FROM {$this->tables['attribute']}
-                    WHERE id = {$attribute['id']}";
-                $count = $this->dbCommand->queryAffectedRows($sql);
-
-                $sql =
-                    "DELETE FROM {$this->tables['user_attribute']}
-                    WHERE attributeid = {$attribute['id']}";
-                $count = $this->dbCommand->queryAffectedRows($sql);
-            }
 
             Sql_Query('COMMIT');
         } catch (Exception $e) {
@@ -452,5 +337,55 @@ END
         );
 
         return Sql_Affected_Rows();
+    }
+
+    /**
+     * Returns the highest value of id from the user table.
+     *
+     * @return int the highest value of id
+     */
+    public function highestSubscriberId()
+    {
+        $sql = <<<END
+            SELECT MAX(id)
+            FROM {$this->tables['user']}
+END;
+
+        return $this->dbCommand->queryOne($sql);
+    }
+
+    /**
+     * Delete rows from the usermessage table that have status 'not sent'.
+     *
+     * @param array $messageid
+     *
+     * @return int the number of rows deleted
+     */
+    public function deleteNotSent($messageid)
+    {
+        $sql = <<<END
+            DELETE FROM {$this->tables['usermessage']}
+            WHERE status = 'not sent'
+            AND messageid = $messageid
+END;
+
+        return $this->dbCommand->queryAffectedRows($sql);
+    }
+
+    /**
+     * Set the userselection field to null for messages which are used in autoresponders.
+     */
+    public function upgradeMessageTable()
+    {
+        $sql = <<<END
+            UPDATE {$this->tables['message']}
+            SET userselection = null
+            WHERE id IN (
+                SELECT mid
+                FROM {$this->tables['autoresponders']}
+            )
+END;
+
+        return $this->dbCommand->queryAffectedRows($sql);
     }
 }
