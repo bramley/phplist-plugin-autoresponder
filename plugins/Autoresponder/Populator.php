@@ -42,9 +42,8 @@ class Populator implements IPopulator
                 array('onclick' => "return confirm('$prompt')")
             );
             $delay = Util::formatMinutes($item['mins']);
-            $key = $item['id'];
+            $key = "{$item['id']} | {$item['description']}";
             $w->addElement($key, new PageURL(null, array('action' => 'edit', 'id' => $item['id'])));
-            $w->addRow($key, s('Description'), $item['description']);
             $w->addRowHtml(
                 $key,
                 s('Campaign'),
@@ -67,7 +66,7 @@ class Populator implements IPopulator
             $notReady = $this->dao->notReadySubscribers($item['id']);
             $w->addRow($key, s('Subscribers not yet ready to be sent'), count($notReady));
             $w->addColumn($key, s('Added'), $item['entered']);
-            $w->addColumn($key, s('New only'), $item['new'] ? 'yes' : 'no');
+            $w->addColumn($key, s('New only'), $item['new'] ? s('yes') : s('no'));
             $w->addColumnHtml($key, s('Enabled'), $enableLink);
             $w->addColumnHtml($key, s('Delete'), $deleteLink);
         }
