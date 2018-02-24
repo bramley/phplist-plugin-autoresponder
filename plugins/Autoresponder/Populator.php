@@ -64,6 +64,8 @@ class Populator implements IPopulator
             }
             $pending = $this->dao->pendingSubscribers($item['id']);
             $w->addRow($key, s('Subscribers ready to be sent'), count($pending));
+            $notReady = $this->dao->notReadySubscribers($item['id']);
+            $w->addRow($key, s('Subscribers not yet ready to be sent'), count($notReady));
             $w->addColumn($key, s('Added'), $item['entered']);
             $w->addColumn($key, s('New only'), $item['new'] ? 'yes' : 'no');
             $w->addColumnHtml($key, s('Enabled'), $enableLink);

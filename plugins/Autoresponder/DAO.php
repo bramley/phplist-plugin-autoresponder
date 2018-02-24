@@ -62,6 +62,26 @@ END;
         }
     }
 
+    private function possibleSubscribers($arId, $ready)
+    {
+        $compare = $ready ? '<=' : '>';
+        $q =
+            "SELECT lu.userid AS id
+            FROM {$this->tables['autoresponders']} ar
+            INNER JOIN {$this->tables['message']} m ON ar.mid = m.id
+            INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
+            INNER JOIN {$this->tables['listuser']} lu ON lm.listid = lu.listid
+            INNER JOIN {$this->tables['user']} u ON u.id = lu.userid AND u.confirmed = 1 AND u.blacklisted = 0
+            LEFT JOIN {$this->tables['usermessage']} um ON lu.userid = um.userid AND um.messageid = m.id
+            WHERE ar.id = $arId
+            AND (ar.new = 0 || ar.new = 1 && lu.modified > ar.entered)
+            AND lu.modified + INTERVAL ar.mins MINUTE $compare now()
+            AND (um.userid IS NULL OR um.status = 'not sent')
+            GROUP BY lu.userid";
+
+        return $this->dbCommand->queryAll($q);
+    }
+
     /*
      *  Public methods
      */
@@ -133,21 +153,12 @@ END;
 
     public function pendingSubscribers($arId)
     {
-        $q =
-            "SELECT lu.userid AS id
-            FROM {$this->tables['autoresponders']} ar
-            INNER JOIN {$this->tables['message']} m ON ar.mid = m.id
-            INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
-            INNER JOIN {$this->tables['listuser']} lu ON lm.listid = lu.listid
-            INNER JOIN {$this->tables['user']} u ON u.id = lu.userid AND u.confirmed = 1 AND u.blacklisted = 0
-            LEFT JOIN {$this->tables['usermessage']} um ON lu.userid = um.userid AND um.messageid = m.id
-            WHERE ar.id = $arId
-            AND (ar.new = 0 || ar.new = 1 && lu.modified > ar.entered)
-            AND (UNIX_TIMESTAMP(lu.modified) + (ar.mins * 60)) < UNIX_TIMESTAMP(now())
-            AND (um.userid IS NULL OR um.status = 'not sent')
-            GROUP BY lu.userid";
+        return $this->possibleSubscribers($arId, true);
+    }
 
-        return $this->dbCommand->queryAll($q);
+    public function notReadySubscribers($arId)
+    {
+        return $this->possibleSubscribers($arId, false);
     }
 
     public function getArListNames()
