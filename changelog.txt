@@ -1,3 +1,8 @@
+version 3.0.1+20180224
+      On the Manage page display the number of subscribers not ready to send.
+      Minor improvements to the Manage page.
+      Rename cs fixer config file
+
 version 3.0.0+20180210
       Make text translateable
       Rework method of selecting subscribers

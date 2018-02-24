@@ -52,6 +52,7 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    3.0.1+20180224  Display the number of subscribers not ready to send
     3.0.0+20180210  Rework method of selecting subscribers
     2.3.3+20170127  Improve handling of missing attribute
     2.3.2+20160527  Add class map for autoloading
