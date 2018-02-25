@@ -29,6 +29,7 @@ class Populator implements IPopulator
     public function populate(WebblerListing $w, $start, $limit)
     {
         $w->setTitle('Autoresponders');
+        $w->setElementHeading('Autoresponder');
 
         foreach ($this->dao->getAutoresponders($this->listId) as $item) {
             $enableLink = new PageLink(
@@ -62,9 +63,13 @@ class Populator implements IPopulator
                 $w->addRow($key, s('After sending, add subscriber to'), $item['addlist']);
             }
             $pending = $this->dao->pendingSubscribers($item['id']);
-            $w->addRow($key, s('Subscribers ready to be sent'), count($pending));
             $notReady = $this->dao->notReadySubscribers($item['id']);
-            $w->addRow($key, s('Subscribers not yet ready to be sent'), count($notReady));
+            $totalSent = $this->dao->totalSentSubscribers($item['id']);
+            $w->addRow(
+                $key,
+                s('Subscribers ready | not ready | already sent'),
+                sprintf('%s | %s | %s', count($pending), count($notReady), $totalSent)
+            );
             $w->addColumn($key, s('Added'), $item['entered']);
             $w->addColumn($key, s('New only'), $item['new'] ? s('yes') : s('no'));
             $w->addColumnHtml($key, s('Enabled'), $enableLink);

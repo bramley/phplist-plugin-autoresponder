@@ -21,6 +21,7 @@ use phpList\plugin\Common\DAO\Lists as ListDao;
 use phpList\plugin\Common\Listing;
 use phpList\plugin\Common\PageLink;
 use phpList\plugin\Common\PageURL;
+use phpList\plugin\Common\Toolbar;
 use CHtml;
 
 class Manage extends Controller
@@ -93,6 +94,8 @@ class Manage extends Controller
      */
     private function displayAutoresponders(array $params = array())
     {
+        global $plugins;
+
         $listId = (isset($_GET['listfilter']) && ctype_digit($_GET['listfilter']))
             ? $_GET['listfilter']
             : 0;
@@ -114,10 +117,13 @@ class Manage extends Controller
                 $errors = array();
             }
         }
+        $toolbar = new Toolbar($this);
+        $toolbar->addExternalHelpButton($plugins['Autoresponder']->documentationUrl);
         $vars = array(
             'errors' => $errors,
             'filter' => $listSelect,
             'listing' => $listing->display(),
+            'toolbar' => $toolbar->display(),
         );
 
         return $this->render(__DIR__ . '/../View/listingview.tpl.php', $vars);

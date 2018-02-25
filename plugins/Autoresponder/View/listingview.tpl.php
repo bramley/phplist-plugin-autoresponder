@@ -23,6 +23,9 @@ $(function() {
 END;
 ?>
 <div class="ar-admin">
+    <div>
+    <?php echo $toolbar; ?>
+    </div>
     <?php if ($errors) { ?>
         <div class="ar-errors" style="padding-top: 10px;">
             <div class="note">
@@ -32,16 +35,18 @@ END;
             </div>
         </div>
     <?php } ?>
-    <div class="panel">
-        <div class="header"><h2><?= s('Filter')?></h2></div>
-        <div class="content">
-            <div class="ar-admin-current" style="padding-top: 10px;">
-                <form method="GET" action="">
-                    <input type="hidden" value=<?php echo $_GET['page']; ?>  name="page" id="page" />
-                    <input type="hidden" value=<?php echo $_GET['pi']; ?>  name="pi" id="pi" />
-                    <label><?= s('Filter by list')?>
-    <?php echo $filter; ?></label>
-                </form>
+    <div style='padding-top: 10px;'>
+        <div class="panel">
+            <div class="header"><h2><?= s('Filter')?></h2></div>
+            <div class="content">
+                <div class="ar-admin-current" style="padding-top: 10px;">
+                    <form method="GET" action="">
+                        <input type="hidden" value=<?php echo $_GET['page']; ?>  name="page" id="page" />
+                        <input type="hidden" value=<?php echo $_GET['pi']; ?>  name="pi" id="pi" />
+                        <label><?= s('Filter by list')?>
+        <?php echo $filter; ?></label>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

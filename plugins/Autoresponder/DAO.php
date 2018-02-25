@@ -161,6 +161,19 @@ END;
         return $this->possibleSubscribers($arId, false);
     }
 
+    public function totalSentSubscribers($arId)
+    {
+        $sql =
+            "SELECT COUNT(*)
+            FROM {$this->tables['autoresponders']} ar
+            JOIN {$this->tables['message']} m ON ar.mid = m.id
+            JOIN {$this->tables['usermessage']} um ON um.messageid = m.id
+            WHERE ar.id = $arId
+            AND um.status = 'sent'";
+
+        return $this->dbCommand->queryOne($sql);
+    }
+
     public function getArListNames()
     {
         static $names = null;

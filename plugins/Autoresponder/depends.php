@@ -26,6 +26,9 @@ return [
             $container->get('phpList\plugin\Common\DAO\Lists')
         );
     },
+    'phpList\plugin\Autoresponder\Controller\Pageaction' => function (ContainerInterface $container) {
+        return new Controller\Pageaction();
+    },
     'DAO' => function (ContainerInterface $container) {
         return new DAO(
             $container->get('phpList\plugin\Common\DB')
