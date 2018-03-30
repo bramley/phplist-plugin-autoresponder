@@ -15,7 +15,6 @@ use phpList\plugin\Common\PageLink;
 use phpList\plugin\Common\PageURL;
 use Iterator;
 
-error_reporting(-1);
 class Autoresponder extends phplistPlugin
 {
     const VERSION_FILE = 'version.txt';
@@ -32,6 +31,7 @@ class Autoresponder extends phplistPlugin
     public $coderoot = __DIR__ . '/' . __CLASS__ . '/';
 
     private $selectedSubscribers = array();
+    private $error_level = E_ALL ^ E_NOTICE ^ E_DEPRECATED ^ E_STRICT;
 
     public function __construct()
     {
@@ -105,7 +105,7 @@ class Autoresponder extends phplistPlugin
     {
         global $plugins;
 
-        $level = error_reporting(-1);
+        $level = error_reporting($this->error_level);
 
         foreach ($this->dao->getAutoresponders() as $ar) {
             if (!$ar['enabled']) {

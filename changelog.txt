@@ -1,3 +1,6 @@
+version 3.0.3+20180330
+      Reduce the level of error reporting
+
 version 3.0.2+20180225
       On the Manage page
       - Show the number of subscribers to which an autoresponder has been sent.
