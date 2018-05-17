@@ -31,10 +31,12 @@ class Autoresponder extends phplistPlugin
     public $coderoot = __DIR__ . '/' . __CLASS__ . '/';
 
     private $selectedSubscribers = array();
-    private $error_level = E_ALL ^ E_NOTICE ^ E_DEPRECATED ^ E_STRICT;
+    private $error_level;
 
     public function __construct()
     {
+        $this->error_level = E_ALL ^ E_NOTICE ^ E_DEPRECATED ^ E_STRICT;
+
         parent::__construct();
         $this->version = (is_file($f = $this->coderoot . self::VERSION_FILE))
             ? file_get_contents($f)
