@@ -51,6 +51,7 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    3.0.5+20180613  Remove another dependency on php 5.6
     3.0.4+20180517  Avoid dependency on php 5.6
     3.0.3+20180330  Reduce the level of error reporting
     3.0.2+20180225  Display the number of subscribers to which an autoresponder has been sent

@@ -28,7 +28,7 @@ class Autoresponder extends phplistPlugin
         'manage' => array('category' => 'campaigns'),
     );
     public $documentationUrl = 'https://resources.phplist.com/plugin/autoresponder';
-    public $coderoot = __DIR__ . '/' . __CLASS__ . '/';
+    public $coderoot;
 
     private $selectedSubscribers = array();
     private $error_level;
@@ -36,6 +36,7 @@ class Autoresponder extends phplistPlugin
     public function __construct()
     {
         $this->error_level = E_ALL ^ E_NOTICE ^ E_DEPRECATED ^ E_STRICT;
+        $this->coderoot = __DIR__ . '/' . __CLASS__ . '/';
 
         parent::__construct();
         $this->version = (is_file($f = $this->coderoot . self::VERSION_FILE))

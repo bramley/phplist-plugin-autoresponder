@@ -1,3 +1,6 @@
+version 3.0.5+20180613
+      Remove another dependency on php 5.6
+
 version 3.0.4+20180517
       Avoid dependency on php 5.6
 
