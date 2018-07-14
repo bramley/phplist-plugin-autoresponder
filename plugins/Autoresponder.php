@@ -49,6 +49,7 @@ class Autoresponder extends phplistPlugin
         $this->pageTitles = array(
             'manage' => s('Manage autoresponders'),
         );
+        parent::activate();
     }
 
     public function adminmenu()

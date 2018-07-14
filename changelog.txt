@@ -1,3 +1,6 @@
+version 3.0.6+20180714
+      Added missing call to parent activate() method
+
 version 3.0.5+20180613
       Remove another dependency on php 5.6
 
