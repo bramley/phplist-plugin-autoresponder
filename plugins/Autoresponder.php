@@ -13,7 +13,6 @@
 use chdemko\BitArray\BitArray;
 use phpList\plugin\Common\PageLink;
 use phpList\plugin\Common\PageURL;
-use Iterator;
 
 class Autoresponder extends phplistPlugin
 {
