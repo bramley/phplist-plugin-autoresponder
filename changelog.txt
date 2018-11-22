@@ -1,3 +1,7 @@
+version 3.0.7+20181122
+      Remove unnecessary use statement
+      Correct conversion of delay period into minutes
+
 version 3.0.6+20180714
       Added missing call to parent activate() method
 

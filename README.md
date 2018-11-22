@@ -51,6 +51,7 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    3.0.7+20181122  Correct conversion of delay period into minutes
     3.0.6+20180714  Added missing call to parent activate() method
     3.0.5+20180613  Remove another dependency on php 5.6
     3.0.4+20180517  Avoid dependency on php 5.6

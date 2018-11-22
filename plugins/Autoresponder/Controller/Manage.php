@@ -30,14 +30,27 @@ class Manage extends Controller
 
     private function isValidDelay($delay)
     {
-        return preg_match('/^\d+\s+(minute|hour|day|week|year)s?$/', $delay);
+        return preg_match('/^(\d+)\s+(minute|hour|day|week|year)s?$/', $delay, $matches)
+            ? ['size' => $matches[1], 'unit' => $matches[2]]
+            : false;
     }
 
-    private function delayInMinutes($delay)
+    private function delayInMinutes($delayPeriod)
     {
-        $now = time();
+        $size = $delayPeriod['size'];
 
-        return (strtotime($delay, $now) - $now) / 60;
+        switch ($delayPeriod['unit']) {
+            case 'minute':
+                return $size;
+            case 'hour':
+                return $size * 60;
+            case 'day':
+                return $size * 60 * 24;
+            case 'week':
+                return $size * 60 * 24 * 7;
+            case 'year':
+                return $size * 60 * 24 * 7 * 52;
+        }
     }
 
     /**
@@ -228,8 +241,8 @@ class Manage extends Controller
         if (!empty($_POST['delay'])) {
             $delay = trim($_POST['delay']);
 
-            if ($this->isValidDelay($delay)) {
-                $delayMinutes = $this->delayInMinutes($delay);
+            if ($delayPeriod = $this->isValidDelay($delay)) {
+                $delayMinutes = $this->delayInMinutes($delayPeriod);
             } else {
                 $errors[] = s("Invalid delay value '%s'", $delay);
             }
@@ -297,8 +310,8 @@ class Manage extends Controller
         if (!empty($_POST['delay'])) {
             $delay = trim($_POST['delay']);
 
-            if ($this->isValidDelay($delay)) {
-                $delayMinutes = $this->delayInMinutes($delay);
+            if ($delayPeriod = $this->isValidDelay($delay)) {
+                $delayMinutes = $this->delayInMinutes($delayPeriod);
             } else {
                 $errors[] = s("Invalid delay value '%s'", $delay);
             }
