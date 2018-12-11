@@ -43,11 +43,19 @@ class Autoresponder extends phplistPlugin
             : '';
     }
 
+    /**
+     * Use this method as a hook to create the dao.
+     */
     public function activate()
     {
+        $depends = include $this->coderoot . 'depends.php';
+        $container = new phpList\plugin\Common\Container($depends);
+        $this->dao = $container->get('DAO');
+        $this->logger = $container->get('Logger');
         $this->pageTitles = array(
             'manage' => s('Manage autoresponders'),
         );
+
         parent::activate();
     }
 
@@ -61,41 +69,14 @@ class Autoresponder extends phplistPlugin
         global $plugins;
 
         return array(
-            'Common plugin v3.7.0 or later installed' => (
+            'Common plugin v3.8.0 or later installed' => (
                 phpListPlugin::isEnabled('CommonPlugin')
                 &&
-                version_compare($plugins['CommonPlugin']->version, '3.7.0') >= 0
+                version_compare($plugins['CommonPlugin']->version, '3.8.0') >= 0
             ),
             'PHP version 5.4.0 or greater' => version_compare(PHP_VERSION, '5.4') > 0,
+            'phpList version 3.3.2 or later' => version_compare(VERSION, '3.3.2') >= 0,
         );
-    }
-
-    public function cronJobs()
-    {
-        return array(
-            array(
-                'page' => 'process',
-                'frequency' => 60,
-            ),
-        );
-    }
-
-    /**
-     * Use this method as a hook to create the dao.
-     * Need to create autoloader because of the unpredictable order in which plugins are called.
-     */
-    public function sendFormats()
-    {
-        global $plugins;
-
-        require_once $plugins['CommonPlugin']->coderoot . 'Autoloader.php';
-
-        $depends = include $this->coderoot . 'depends.php';
-        $container = new phpList\plugin\Common\Container($depends);
-        $this->dao = $container->get('DAO');
-        $this->logger = $container->get('Logger');
-
-        return;
     }
 
     /**
