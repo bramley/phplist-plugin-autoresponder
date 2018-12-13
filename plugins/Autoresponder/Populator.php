@@ -13,6 +13,8 @@
 
 namespace phpList\plugin\Autoresponder;
 
+use confirmButton;
+use phpList\plugin\Common\ImageTag;
 use phpList\plugin\Common\IPopulator;
 use phpList\plugin\Common\PageLink;
 use phpList\plugin\Common\PageURL;
@@ -34,13 +36,7 @@ class Populator implements IPopulator
         foreach ($this->dao->getAutoresponders($this->listId) as $item) {
             $enableLink = new PageLink(
                 new PageURL(null, array('action' => 'enable', 'id' => $item['id'])),
-                $item['enabled'] ? s('yes') : s('no')
-            );
-            $prompt = s('Delete autoresponder %d, are you sure?', $item['id']);
-            $deleteLink = new PageLink(
-                new PageURL(null, array('action' => 'delete', 'id' => $item['id'])),
-                s('Delete'),
-                array('onclick' => "return confirm('$prompt')")
+                $item['enabled'] ? new ImageTag('yes.png', s('Enabled')) : new ImageTag('no.png', s('Disabled'))
             );
             $delay = Util::formatMinutes($item['mins']);
             $key = "{$item['id']} | {$item['description']}";
@@ -73,7 +69,7 @@ class Populator implements IPopulator
             $w->addColumn($key, s('Added'), $item['entered']);
             $w->addColumn($key, s('New only'), $item['new'] ? s('yes') : s('no'));
             $w->addColumnHtml($key, s('Enabled'), $enableLink);
-            $w->addColumnHtml($key, s('Delete'), $deleteLink);
+            $w->addColumnHtml($key, s('Delete'), $this->confirmDeleteButton($item['id']));
         }
         $w->addButton(s('Add'), new PageURL(null, array('action' => 'add')));
     }
@@ -81,5 +77,18 @@ class Populator implements IPopulator
     public function total()
     {
         return count($this->dao->getAutoresponders($this->listId));
+    }
+
+    private function confirmDeleteButton($id)
+    {
+        $button = new confirmButton(
+            s('Delete autoresponder %d, are you sure?', $id),
+            new PageURL(null, ['action' => 'delete', 'id' => $id, 'redirect' => $_SERVER['REQUEST_URI']]),
+            'Delete',
+            'Delete autoresponder',
+            'button'
+        );
+
+        return sprintf('<span class="delete">%s</span>', $button->show());
     }
 }
