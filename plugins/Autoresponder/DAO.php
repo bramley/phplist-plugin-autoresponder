@@ -14,9 +14,12 @@
 namespace phpList\plugin\Autoresponder;
 
 use phpList\plugin\Common;
+use phpList\plugin\Common\DAO\MessageTrait;
 
 class DAO extends Common\DAO
 {
+    use MessageTrait;
+
     /**
      * Create the database table
      * Upgrade the table by adding the addlistid column.
@@ -376,24 +379,6 @@ END
 END;
 
         return $this->dbCommand->queryOne($sql);
-    }
-
-    /**
-     * Delete rows from the usermessage table that have status 'not sent'.
-     *
-     * @param array $messageid
-     *
-     * @return int the number of rows deleted
-     */
-    public function deleteNotSent($messageid)
-    {
-        $sql = <<<END
-            DELETE FROM {$this->tables['usermessage']}
-            WHERE status = 'not sent'
-            AND messageid = $messageid
-END;
-
-        return $this->dbCommand->queryAffectedRows($sql);
     }
 
     /**
