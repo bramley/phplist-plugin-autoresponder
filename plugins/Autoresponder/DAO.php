@@ -214,24 +214,36 @@ END;
      * Returns the fields for all autoresponders or for those autoresponders whose campaigns are sent to a specific list.
      * The result is cached as this method can be called several times.
      *
-     * @param int $listId optional list id
+     * @param int  $listId  optional list id
+     * @param bool $enabled whether to return only enabled or all autoresponders
      *
      * @return Iterator
      */
-    public function getAutoresponders($listId = 0)
+    public function getAutoresponders($listId = 0, $enabled = true)
     {
         static $responders = null;
 
         if ($responders !== null) {
             return $responders;
         }
-        $where = ($listId > 0)
-            ? "lm.listid = $listId"
-            : 'lm.listid != 0';
+        $w = [];
+
+        if ($listId > 0) {
+            $w[] = "lm.listid = $listId";
+        }
+
+        if ($enabled) {
+            $join = 'JOIN';
+            $w[] = 'ar.enabled';
+        } else {
+            $join = 'LEFT JOIN';
+        }
+        $where = $w ? 'WHERE ' . implode(' AND ', $w) : '';
         $sql = <<<END
             SELECT
                 ar.*,
                 m.subject,
+                m.id as messageid,
                 GROUP_CONCAT(
                     DISTINCT CONCAT('"', l.name, '"')
                     ORDER BY l.name
@@ -239,11 +251,11 @@ END;
                 ) AS list_names,
                 l2.name AS addlist
             FROM {$this->tables['autoresponders']} ar
-            INNER JOIN {$this->tables['message']} m ON ar.mid = m.id
-            INNER JOIN {$this->tables['listmessage']} lm ON m.id = lm.messageid
-            INNER JOIN {$this->tables['list']} l ON l.id = lm.listid
+            $join {$this->tables['message']} m ON ar.mid = m.id
+            $join {$this->tables['listmessage']} lm ON m.id = lm.messageid
+            $join {$this->tables['list']} l ON l.id = lm.listid
             LEFT JOIN {$this->tables['list']} l2 ON l2.id = ar.addlistid
-            WHERE $where
+            $where
             GROUP BY ar.id
             ORDER BY list_names, ar.mins
 END;

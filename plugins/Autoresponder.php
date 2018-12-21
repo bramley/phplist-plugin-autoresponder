@@ -92,9 +92,6 @@ class Autoresponder extends phplistPlugin
         $level = error_reporting($this->error_level);
 
         foreach ($this->dao->getAutoresponders() as $ar) {
-            if (!$ar['enabled']) {
-                continue;
-            }
             $subscribers = $this->dao->pendingSubscribers($ar['id']);
             $messageId = $ar['mid'];
             $this->logger->debug(sprintf('%d %d', $messageId, count($subscribers)));

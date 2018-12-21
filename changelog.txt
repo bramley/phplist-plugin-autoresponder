@@ -1,3 +1,9 @@
+version 3.1.0+20181222
+      Use activate() method for initialisation
+      Use image buttons to enable and delete autoresponders
+      Use message trait
+      Display autoresponders whose message has been deleted
+
 version 3.0.7+20181122
       Remove unnecessary use statement
       Correct conversion of delay period into minutes

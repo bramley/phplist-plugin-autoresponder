@@ -33,26 +33,30 @@ class Populator implements IPopulator
         $w->setTitle('Autoresponders');
         $w->setElementHeading('Autoresponder');
 
-        foreach ($this->dao->getAutoresponders($this->listId) as $item) {
-            $enableLink = new PageLink(
-                new PageURL(null, array('action' => 'enable', 'id' => $item['id'])),
-                $item['enabled'] ? new ImageTag('yes.png', s('Enabled')) : new ImageTag('no.png', s('Disabled'))
-            );
-            $delay = Util::formatMinutes($item['mins']);
+        foreach ($this->dao->getAutoresponders($this->listId, false) as $item) {
             $key = "{$item['id']} | {$item['description']}";
-            $w->addElement($key, new PageURL(null, array('action' => 'edit', 'id' => $item['id'])));
-            $w->addRowHtml(
-                $key,
-                s('Campaign'),
-                new PageLink(
+
+            if ($item['messageid']) {
+                $w->addElement($key, new PageURL(null, array('action' => 'edit', 'id' => $item['id'])));
+                $enabledColumn = new PageLink(
+                    new PageURL(null, array('action' => 'enable', 'id' => $item['id'])),
+                    $item['enabled'] ? new ImageTag('yes.png', s('Enabled')) : new ImageTag('no.png', s('Disabled'))
+                );
+                $messageRow = new PageLink(
                     new PageURL('message', array('id' => $item['mid'])),
                     $item['mid'] . ' | ' . htmlspecialchars($item['subject'])
-                )
-            );
+                );
+            } else {
+                // the message used by the autoresponder does not exist
+                $w->addElement($key);
+                $enabledColumn = new ImageTag('no.png', s('Disabled'));
+                $messageRow = s('Campaign %d does not exist', $item['mid']);
+            }
+            $w->addRowHtml($key, s('Campaign'), $messageRow);
             $w->addRow(
                 $key,
                 s('Autoresponder email will be sent'),
-                s('%s after subscription to %s', $delay, $item['list_names'])
+                s('%s after subscription to %s', Util::formatMinutes($item['mins']), $item['list_names'])
             );
 
             if ($item['addlist']) {
@@ -68,7 +72,7 @@ class Populator implements IPopulator
             );
             $w->addColumn($key, s('Added'), $item['entered']);
             $w->addColumn($key, s('New only'), $item['new'] ? s('yes') : s('no'));
-            $w->addColumnHtml($key, s('Enabled'), $enableLink);
+            $w->addColumnHtml($key, s('Enabled'), $enabledColumn);
             $w->addColumnHtml($key, s('Delete'), $this->confirmDeleteButton($item['id']));
         }
         $w->addButton(s('Add'), new PageURL(null, array('action' => 'add')));
@@ -76,7 +80,7 @@ class Populator implements IPopulator
 
     public function total()
     {
-        return count($this->dao->getAutoresponders($this->listId));
+        return count($this->dao->getAutoresponders($this->listId, false));
     }
 
     private function confirmDeleteButton($id)
