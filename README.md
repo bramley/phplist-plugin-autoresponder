@@ -2,7 +2,7 @@
 
 ## Description ##
 
-This plugin allows you to send a campaign to subscribers of a list at a specified period after each subscriber joined the list 
+This plugin allows you to send a campaign to subscribers of a list at a specified period after each subscriber joined the list
 (sending at a different actual time for each subscriber).
 For example, to send a newsletter to a subscriber 1 day after he joined the list.
 
@@ -30,7 +30,7 @@ The benefit of this is that plugins will not be affected when you upgrade phplis
 ### Install through phplist ###
 Install on the Plugins page (menu Config > Manage Plugins) using the package URL `https://github.com/bramley/phplist-plugin-autoresponder/archive/master.zip`.
 
-In phplist releases 3.0.5 and earlier there is a bug that can cause a plugin to be incompletely installed on some configurations (<https://mantis.phplist.com/view.php?id=16865>). 
+In phplist releases 3.0.5 and earlier there is a bug that can cause a plugin to be incompletely installed on some configurations (<https://mantis.phplist.com/view.php?id=16865>).
 Check that these files are in the plugin directory. If not then you will need to install manually. The bug has been fixed in release 3.0.6.
 
 * the file Autoresponder.php
@@ -51,6 +51,7 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    3.2.0+20190405  Add reset function to aid testing an autoresponder
     3.1.0+20181222  Display autoresponders whose message has been deleted
     3.0.7+20181122  Correct conversion of delay period into minutes
     3.0.6+20180714  Added missing call to parent activate() method

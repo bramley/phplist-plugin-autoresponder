@@ -22,8 +22,6 @@
 
 namespace phpList\plugin\Autoresponder;
 
-use phpList\plugin\Common\PageURL;
-
 class Util
 {
     public static function formatMinutes($mins)
@@ -45,11 +43,5 @@ class Util
         }
 
         return $mins . ' minute' . ($mins != 1 ? 's' : '');
-    }
-
-    public static function pluginRedirect($page = '')
-    {
-        header('Location: ' . new PageURL($page));
-        exit;
     }
 }

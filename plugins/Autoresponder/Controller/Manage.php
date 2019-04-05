@@ -28,6 +28,21 @@ class Manage extends Controller
 {
     private $dao;
 
+    /**
+     * Redirect to a specific page setting the session errors.
+     *
+     * @param string $page     target of redirect
+     * @param array  $messages success or error messages to be saved in the session
+     */
+    private function redirect($page, $messages = [])
+    {
+        $location = $page ? $page : new PageURL();
+        $_SESSION['autoresponder_errors'] = $messages;
+        header('Location: ' . $location);
+
+        exit;
+    }
+
     private function isValidDelay($delay)
     {
         return preg_match('/^(\d+)\s+(minute|hour|day|week|year)s?$/', $delay, $matches)
@@ -267,7 +282,7 @@ class Manage extends Controller
         }
 
         if ($errors) {
-            header('Location: ' . new PageURL(null, array('action' => 'add')));
+            $redirect = new PageURL(null, array('action' => 'add'));
             $_SESSION['autoresponder_form'] = array(
                 'description' => $_POST['description'],
                 'mid' => $_POST['mid'],
@@ -276,11 +291,10 @@ class Manage extends Controller
                 'new' => $newOnly,
             );
         } else {
-            $errors[] = s('Autoresponder added');
-            header('Location: ' . new PageURL());
+            $redirect = null;
+            $errors = [s('Autoresponder added')];
         }
-        $_SESSION['autoresponder_errors'] = $errors;
-        exit;
+        $this->redirect($redirect, $errors);
     }
 
     protected function actionEdit()
@@ -336,7 +350,7 @@ class Manage extends Controller
         }
 
         if ($errors) {
-            header('Location: ' . new PageURL(null, array('action' => 'edit', 'id' => $_GET['id'])));
+            $redirect = PageURL::createFromGet();
             $_SESSION['autoresponder_form'] = array(
                 'description' => $_POST['description'],
                 'mid' => $_POST['mid'],
@@ -345,57 +359,37 @@ class Manage extends Controller
                 'new' => $newOnly,
             );
         } else {
-            $errors[] = "Autoresponder {$_GET['id']} amended";
-            header('Location: ' . new PageURL());
+            $redirect = null;
+            $errors = [s('Autoresponder %d amended', $_GET['id'])];
         }
-        $_SESSION['autoresponder_errors'] = $errors;
-        exit;
+        $this->redirect($redirect, $errors);
     }
 
     protected function actionDelete()
     {
         $id = isset($_GET['id']) ? intval($_GET['id']) : null;
-
-        if ($id) {
-            if ($this->dao->deleteAutoresponder($id)) {
-                Util::pluginRedirect();
-            }
-            $error = s('Unable to delete autoresponder');
-        } else {
-            $error = s('A message id must be specified');
-        }
-        echo $this->displayAutoresponders(array('errors' => array($error)));
+        $message = $id ?
+            ($this->dao->deleteAutoresponder($id) ? s('Autoresponder %d deleted', $id) : s('Unable to delete autoresponder'))
+            : s('An autoreponder id must be specified');
+        $this->redirect(null, [$message]);
     }
 
     protected function actionReset()
     {
         $id = isset($_GET['id']) ? intval($_GET['id']) : null;
-
-        if ($id) {
-            if ($this->dao->resetAutoresponder($id)) {
-                $_SESSION['autoresponder_errors'] = ["Autoresponder $id reset"];
-                Util::pluginRedirect();
-            }
-            $error = s('Unable to reset autoresponder');
-        } else {
-            $error = s('An autoresonder id must be specified');
-        }
-        echo $this->displayAutoresponders(array('errors' => array($error)));
+        $message = $id ?
+            ($this->dao->resetAutoresponder($id) ? s('Autoresponder %d reset', $id) : s('Unable to reset autoresponder'))
+            : s('An autoreponder id must be specified');
+        $this->redirect(null, [$message]);
     }
 
     protected function actionEnable()
     {
         $id = isset($_GET['id']) ? intval($_GET['id']) : null;
-
-        if ($id) {
-            if ($this->dao->toggleEnabled($id)) {
-                Util::pluginRedirect();
-            }
-            $error = s('Unable to enable/disable autoresponder');
-        } else {
-            $error = s('A message id must be specified');
-        }
-        echo $this->displayAutoresponders(array('errors' => array($error)));
+        $message = $id ?
+            ($this->dao->toggleEnabled($id) ? s('Autoresponder %d enabled/disabled', $id) : s('Unable to enable/disable autoresponder'))
+            : s('An autoreponder id must be specified');
+        $this->redirect(null, [$message]);
     }
 
     public function __construct(DAO $dao, ListDao $listDao)

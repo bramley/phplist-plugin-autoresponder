@@ -1,3 +1,7 @@
+version 3.2.0+20190405
+      Add reset function to remove rows from usermessage and listuser tables
+      Tidy-up how success and validation error messages are handled
+
 version 3.1.0+20181222
       Use activate() method for initialisation
       Use image buttons to enable and delete autoresponders
