@@ -336,6 +336,41 @@ END;
         return true;
     }
 
+    public function resetAutoresponder($id)
+    {
+        try {
+            Sql_Query('BEGIN');
+
+            $sql =
+                "SELECT mid FROM {$this->tables['autoresponders']}
+                WHERE id = $id";
+            $mid = $this->dbCommand->queryOne($sql);
+
+            if ($mid) {
+                $sql =
+                    "DELETE FROM {$this->tables['usermessage']}
+                    WHERE messageid = $mid";
+                $count = $this->dbCommand->queryAffectedRows($sql);
+
+                $sql =
+                    "DELETE lu
+                    FROM {$this->tables['listuser']} lu
+                    JOIN {$this->tables['listmessage']} lm ON lu.listid = lm.listid
+                    JOIN {$this->tables['message']} m ON m.id = lm.messageid
+                    WHERE m.id = $mid";
+                $count = $this->dbCommand->queryAffectedRows($sql);
+            }
+
+            Sql_Query('COMMIT');
+        } catch (Exception $e) {
+            Sql_Query('ROLLBACK');
+
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Return the autoresponder, if there is one, for a message.
      *

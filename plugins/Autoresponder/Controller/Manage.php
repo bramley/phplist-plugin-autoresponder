@@ -367,6 +367,22 @@ class Manage extends Controller
         echo $this->displayAutoresponders(array('errors' => array($error)));
     }
 
+    protected function actionReset()
+    {
+        $id = isset($_GET['id']) ? intval($_GET['id']) : null;
+
+        if ($id) {
+            if ($this->dao->resetAutoresponder($id)) {
+                $_SESSION['autoresponder_errors'] = ["Autoresponder $id reset"];
+                Util::pluginRedirect();
+            }
+            $error = s('Unable to reset autoresponder');
+        } else {
+            $error = s('An autoresonder id must be specified');
+        }
+        echo $this->displayAutoresponders(array('errors' => array($error)));
+    }
+
     protected function actionEnable()
     {
         $id = isset($_GET['id']) ? intval($_GET['id']) : null;
