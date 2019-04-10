@@ -1,3 +1,6 @@
+version 3.2.1+20191231
+      Add missing htmlspecialchars() on URLs for buttons
+
 version 3.2.0+20190405
       Add reset function to remove rows from usermessage and listuser tables
       Tidy-up how success and validation error messages are handled

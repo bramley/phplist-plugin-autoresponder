@@ -51,6 +51,7 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    3.2.1+20191231  Add missing htmlspecialchars() on URLs for buttons
     3.2.0+20190405  Add reset function to aid testing an autoresponder
     3.1.0+20181222  Display autoresponders whose message has been deleted
     3.0.7+20181122  Correct conversion of delay period into minutes

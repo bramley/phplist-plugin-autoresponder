@@ -76,7 +76,7 @@ class Populator implements IPopulator
             $w->addColumnHtml($key, s('Delete'), $this->confirmDeleteButton($item['id']));
             $w->addColumnHtml($key, s('Reset'), $this->confirmResetButton($item['id']));
         }
-        $w->addButton(s('Add'), new PageURL(null, array('action' => 'add')));
+        $w->addButton(s('Add'), htmlspecialchars(new PageURL(null, array('action' => 'add'))));
     }
 
     public function total()
@@ -88,7 +88,7 @@ class Populator implements IPopulator
     {
         $button = new confirmButton(
             s('Delete autoresponder %d, are you sure?', $id),
-            new PageURL(null, ['action' => 'delete', 'id' => $id, 'redirect' => $_SERVER['REQUEST_URI']]),
+            htmlspecialchars(new PageURL(null, ['action' => 'delete', 'id' => $id, 'redirect' => $_SERVER['REQUEST_URI']])),
             'Delete',
             'Delete autoresponder',
             'button'
@@ -101,7 +101,7 @@ class Populator implements IPopulator
     {
         $button = new confirmButton(
             s('Reset autoresponder %d. This is for testing the autoresponder and will remove rows from the usermessage and listuser tables, are you sure?', $id),
-            new PageURL(null, ['action' => 'reset', 'id' => $id, 'redirect' => $_SERVER['REQUEST_URI']]),
+            htmlspecialchars(new PageURL(null, ['action' => 'reset', 'id' => $id, 'redirect' => $_SERVER['REQUEST_URI']])),
             'Reset',
             'Reset autoresponder',
             'button'
