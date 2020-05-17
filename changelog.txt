@@ -1,3 +1,7 @@
+version 3.3.0+20200517
+      Remove 'notsent' rows from usermessage table only for subscribers who are now ready to be sent the campaign.
+      Update PHP CS Fixer
+
 version 3.2.1+20191231
       Add missing htmlspecialchars() on URLs for buttons
 

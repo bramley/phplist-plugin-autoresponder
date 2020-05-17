@@ -13,6 +13,7 @@
 
 namespace phpList\plugin\Autoresponder\Controller;
 
+use CHtml;
 use phpList\plugin\Autoresponder\DAO;
 use phpList\plugin\Autoresponder\Populator;
 use phpList\plugin\Autoresponder\Util;
@@ -22,7 +23,6 @@ use phpList\plugin\Common\Listing;
 use phpList\plugin\Common\PageLink;
 use phpList\plugin\Common\PageURL;
 use phpList\plugin\Common\Toolbar;
-use CHtml;
 
 class Manage extends Controller
 {
