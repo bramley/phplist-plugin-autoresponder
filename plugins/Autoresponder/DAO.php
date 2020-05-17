@@ -143,17 +143,6 @@ END;
         return true;
     }
 
-    public function submitCampaign($messageId)
-    {
-        Sql_Query(
-            "UPDATE {$this->tables['message']}
-            SET status = 'submitted'
-            WHERE (status = 'sent' OR status = 'draft') AND id = $messageId"
-        );
-
-        return Sql_Affected_Rows() > 0;
-    }
-
     public function pendingSubscribers($arId)
     {
         return $this->possibleSubscribers($arId, true);

@@ -29,8 +29,9 @@ class Autoresponder extends phplistPlugin
     public $documentationUrl = 'https://resources.phplist.com/plugin/autoresponder';
     public $coderoot;
 
-    private $selectedSubscribers = array();
+    private $dao;
     private $error_level;
+    private $selectedSubscribers = array();
 
     public function __construct()
     {
@@ -69,10 +70,10 @@ class Autoresponder extends phplistPlugin
         global $plugins;
 
         return array(
-            'Common plugin v3.8.0 or later installed' => (
+            'Common plugin v3.12.2 or later must be enabled' => (
                 phpListPlugin::isEnabled('CommonPlugin')
                 &&
-                version_compare($plugins['CommonPlugin']->version, '3.8.0') >= 0
+                version_compare($plugins['CommonPlugin']->version, '3.12.2') >= 0
             ),
             'PHP version 5.4.0 or greater' => version_compare(PHP_VERSION, '5.4') > 0,
             'phpList version 3.3.2 or later' => version_compare(VERSION, '3.3.2') >= 0,
@@ -101,12 +102,7 @@ class Autoresponder extends phplistPlugin
             }
             $this->logger->debug("Campaign $messageId submitted");
             $submitted = $this->dao->submitCampaign($messageId);
-
-            if ($submitted) {
-                foreach ($plugins as $plugin) {
-                    $plugin->messageReQueued($messageId);
-                }
-            }
+            $this->dao->deleteNotSent($messageId, array_column(iterator_to_array($subscribers), 'id'));
             $this->selectedSubscribers[$messageId] = $this->loadSubscribers($subscribers);
         }
         error_reporting($level);
@@ -192,31 +188,6 @@ class Autoresponder extends phplistPlugin
 END;
 
         return array('Autoresponder', $html);
-    }
-
-    /**
-     * Use this hook to delete the 'not sent' rows from the usermessage table
-     * so that they will be re-evaluated.
-     *
-     * @param int $id the message id
-     *
-     * @return none
-     */
-    public function messageQueued($id)
-    {
-        $this->dao->deleteNotSent($id);
-    }
-
-    /**
-     * The same processing as when queueing a message.
-     *
-     * @param int $id the message id
-     *
-     * @return none
-     */
-    public function messageReQueued($id)
-    {
-        $this->messageQueued($id);
     }
 
     /**
