@@ -15,35 +15,14 @@ is due.
 
 ### Dependencies ###
 
-Requires php version 5.4 or later.
+Requires phpList version 3.3.2 or later and php version 5.4 or later.
 
-This plugin requires the Common Plugin v3 to also be installed, and will not work without that.
-**You must install that plugin or upgrade to the latest version if it is already installed**.
-See <https://github.com/bramley/phplist-plugin-common>
-
-### Set the plugin directory ###
-The default plugin directory is `plugins` within the admin directory.
-
-You can use a directory outside of the web root by changing the definition of `PLUGIN_ROOTDIR` in config.php.
-The benefit of this is that plugins will not be affected when you upgrade phplist.
+Also requires the Common Plugin v3.12.2 or later to be installed.
+phplist now includes Common Plugin so you should only need to enable it on the Manage Plugins page.
 
 ### Install through phplist ###
-Install on the Plugins page (menu Config > Manage Plugins) using the package URL `https://github.com/bramley/phplist-plugin-autoresponder/archive/master.zip`.
-
-In phplist releases 3.0.5 and earlier there is a bug that can cause a plugin to be incompletely installed on some configurations (<https://mantis.phplist.com/view.php?id=16865>).
-Check that these files are in the plugin directory. If not then you will need to install manually. The bug has been fixed in release 3.0.6.
-
-* the file Autoresponder.php
-* the directory Autoresponder
-
-### Install manually ###
-Download the plugin zip file from <https://github.com/bramley/phplist-plugin-autoresponder/archive/master.zip>
-
-Expand the zip file, then copy the contents of the plugins directory to your phplist plugins directory.
-This should contain
-
-* the file Autoresponder.php
-* the directory Autoresponder
+Install on the Plugins page (menu Config > Manage Plugins) using the package URL\
+`https://github.com/bramley/phplist-plugin-autoresponder/archive/master.zip`
 
 ## Usage ##
 For guidance on usage see the plugin page within the phplist documentation site <https://resources.phplist.com/plugin/autoresponder>
@@ -51,6 +30,7 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    3.3.1+20200713  Revise README file
     3.3.0+20200517  Improve method of removing 'notsent' rows from usermessage table
     3.2.1+20191231  Add missing htmlspecialchars() on URLs for buttons
     3.2.0+20190405  Add reset function to aid testing an autoresponder
