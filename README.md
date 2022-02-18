@@ -30,6 +30,7 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    3.3.2+20220218  Improve the display of field labels on the autoresponder form
     3.3.1+20200713  Revise README file
     3.3.0+20200517  Improve method of removing 'notsent' rows from usermessage table
     3.2.1+20191231  Add missing htmlspecialchars() on URLs for buttons

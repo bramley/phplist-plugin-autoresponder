@@ -24,23 +24,31 @@
     <div class="ar-admin-new" style="padding-top: 10px;">
         <div class="panel" >
             <div class="header">
-                <h2><?php echo $title; ?></h2>
+                <h4><?php echo $title; ?></h4>
             </div>
             <div class="content">
                 <form id="ar-admin-new-form" method="post">
-                        <label><?= s('Description')?>:</label>
-                        <?php echo $description; ?>
-                        <label><?= s('Select the draft message to send')?>:</label>
+                        <div>
+                            <label for="description"><?= s('Description')?></label>
+                            <?php echo $description; ?>
+                        </div>
+                        <div>
+                        <label for="mid"><?= s('Select the draft message to send')?></label>
                         <?php echo $messages; ?>
                         <p><?= s('Create further available messages by adding draft messages to phplist')?></p>
-                        <label><?= s('Select a delay')?>:</label>
+                        </div>
+                        <div>
+                        <label for="mins"><?= s('Select a delay')?></label>
                         <p><?= s('After a subscription, how long to wait until sending the autoresponder email to the subscriber')?></p>
                         <?php echo $mins; ?>
-                        <label><?= s('Or enter another value (e.g. 16 days)')?>:</label>
+                        <?= s('Or enter another value (e.g. 16 days)')?>
                         <?php echo $delay; ?>
-                        <label><?= s('Actions')?>:</label>
+                        </div>
+                        <div>
+                        <label for="addlist"><?= s('Actions')?></label>
                         <p><?= s('Add each subscriber to another list when the autoresponder has been sent')?></p>
                         <?php echo $lists; ?>
+                        </div>
                     <fieldset>
                         <?php echo $newOnly; ?>
                         <span><?= s('Only send to new users (keep checked unless you know what you are doing!)')?></span>

@@ -1,3 +1,6 @@
+version 3.3.2+20220218
+      Improve the display of field labels on the autoresponder form
+
 version 3.3.1+20200713
       Revise dependencies and installation instructions.
 
