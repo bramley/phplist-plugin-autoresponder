@@ -17,7 +17,7 @@ is due.
 
 Requires phpList version 3.3.2 or later and php version 5.4 or later.
 
-Also requires the Common Plugin v3.12.2 or later to be installed.
+Also requires the Common Plugin v3.18.4 or later to be installed.
 phplist now includes Common Plugin so you should only need to enable it on the Manage Plugins page.
 
 ### Install through phplist ###
@@ -30,6 +30,7 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    3.4.0+20220421  Fix for error in deleting 'not sent' rows from the usermessage table
     3.3.2+20220218  Improve the display of field labels on the autoresponder form
     3.3.1+20200713  Revise README file
     3.3.0+20200517  Improve method of removing 'notsent' rows from usermessage table

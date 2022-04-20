@@ -70,10 +70,10 @@ class Autoresponder extends phplistPlugin
         global $plugins;
 
         return array(
-            'Common plugin v3.12.2 or later must be enabled' => (
+            'Common plugin v3.18.4 or later must be enabled' => (
                 phpListPlugin::isEnabled('CommonPlugin')
                 &&
-                version_compare($plugins['CommonPlugin']->version, '3.12.2') >= 0
+                version_compare($plugins['CommonPlugin']->version, '3.18.4') >= 0
             ),
             'PHP version 5.4.0 or greater' => version_compare(PHP_VERSION, '5.4') > 0,
             'phpList version 3.3.2 or later' => version_compare(VERSION, '3.3.2') >= 0,
@@ -93,16 +93,20 @@ class Autoresponder extends phplistPlugin
         $level = error_reporting($this->error_level);
 
         foreach ($this->dao->getAutoresponders() as $ar) {
-            $subscribers = $this->dao->pendingSubscribers($ar['id']);
+            $subscriberIter = $this->dao->pendingSubscribers($ar['id']);
+            $subscribers = array_column(iterator_to_array($subscriberIter), 'id');
             $messageId = $ar['mid'];
-            $this->logger->debug(sprintf('%d %d', $messageId, count($subscribers)));
+            $this->logger->debug(
+                sprintf('autoresponder %d campaign %d subscribers ready %d', $ar['id'], $messageId, count($subscribers))
+            );
 
             if (count($subscribers) == 0) {
                 continue;
             }
-            $this->logger->debug("Campaign $messageId submitted");
+            $this->logger->debug(print_r($subscribers, true));
             $submitted = $this->dao->submitCampaign($messageId);
-            $this->dao->deleteNotSent($messageId, array_column(iterator_to_array($subscribers), 'id'));
+            $rows = $this->dao->deleteNotSent($messageId, $subscribers);
+            $this->logger->debug(sprintf('rows deleted %d', $rows));
             $this->selectedSubscribers[$messageId] = $this->loadSubscribers($subscribers);
         }
         error_reporting($level);
@@ -210,17 +214,17 @@ END;
     /**
      * Load subscribers into a BitArray.
      *
-     * @param Iterator $subscribers
+     * @param array $subscribers
      *
      * @return BitArray
      */
-    private function loadSubscribers(Iterator $subscribers)
+    private function loadSubscribers(array $subscribers)
     {
         $highest = $this->dao->highestSubscriberId();
         $subscriberArray = BitArray::fromInteger($highest + 1);
 
-        foreach ($subscribers as $subscriber) {
-            $subscriberArray[(int) $subscriber['id']] = 1;
+        foreach ($subscribers as $subscriberId) {
+            $subscriberArray[(int) $subscriberId] = 1;
         }
 
         return $subscriberArray;

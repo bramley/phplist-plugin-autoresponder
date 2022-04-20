@@ -1,3 +1,7 @@
+version 3.4.0+20220421
+      Update dependency on Common Plugin to use fix to deleting 'not sent' rows.
+      Improve logging of subscribers ready to be sent.
+
 version 3.3.2+20220218
       Improve the display of field labels on the autoresponder form
 
