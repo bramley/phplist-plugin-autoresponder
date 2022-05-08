@@ -30,6 +30,7 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    3.5.0+20220508  Adjust the finish sending date to ensure phplist continues sending a campaign
     3.4.0+20220421  Fix for error in deleting 'not sent' rows from the usermessage table
     3.3.2+20220218  Improve the display of field labels on the autoresponder form
     3.3.1+20200713  Revise README file

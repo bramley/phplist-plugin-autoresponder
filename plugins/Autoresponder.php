@@ -83,6 +83,7 @@ class Autoresponder extends phplistPlugin
     /**
      * Hook for when process queue is run.
      * Submits any autoresponder campaigns that are pending and stores the subscribers to be sent.
+     * Adjusts the finish sending date to avoid phplist stopping sending the campaign.
      *
      * @return none
      */
@@ -107,6 +108,25 @@ class Autoresponder extends phplistPlugin
             $submitted = $this->dao->submitCampaign($messageId);
             $rows = $this->dao->deleteNotSent($messageId, $subscribers);
             $this->logger->debug(sprintf('rows deleted %d', $rows));
+
+            // Adjust the finish sending date to be well into the future
+            $finish = $ar['finishSending'];
+            $finishTime = mktime($finish['hour'], $finish['minute'], 0, $finish['month'], $finish['day'], $finish['year']);
+
+            if ($finishTime < time() + (24 * 60 * 60)) {
+                $newFinishTime = time() + DEFAULT_MESSAGEAGE;
+                $finishInfo = getdate($newFinishTime);
+                $finish = array(
+                    'year' => $finishInfo['year'],
+                    'month' => $finishInfo['mon'],
+                    'day' => $finishInfo['mday'],
+                    'hour' => $finishInfo['hours'],
+                    'minute' => $finishInfo['minutes'],
+                );
+                setMessageData($messageId, 'finishsending', $finish);
+                logevent(sprintf('Campaign %d finish sending set to %s', $messageId, date('Y-m-d H:i', $newFinishTime)));
+            }
+
             $this->selectedSubscribers[$messageId] = $this->loadSubscribers($subscribers);
         }
         error_reporting($level);

@@ -1,3 +1,6 @@
+version 3.5.0+20220508
+      When the finish sending date of a campaign is near then adjust it to be well into the future to avoid phplist stopping sending.
+
 version 3.4.0+20220421
       Update dependency on Common Plugin to use fix to deleting 'not sent' rows.
       Improve logging of subscribers ready to be sent.

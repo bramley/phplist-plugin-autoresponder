@@ -233,6 +233,7 @@ END;
                 ar.*,
                 m.subject,
                 m.id as messageid,
+                md.data as finishsending,
                 GROUP_CONCAT(
                     DISTINCT CONCAT('"', l.name, '"')
                     ORDER BY l.name
@@ -243,6 +244,7 @@ END;
             $join {$this->tables['message']} m ON ar.mid = m.id
             $join {$this->tables['listmessage']} lm ON m.id = lm.messageid
             $join {$this->tables['list']} l ON l.id = lm.listid
+            LEFT JOIN {$this->tables['messagedata']} md ON md.id = m.id AND md.name = 'finishsending'
             LEFT JOIN {$this->tables['list']} l2 ON l2.id = ar.addlistid
             $where
             GROUP BY ar.id
