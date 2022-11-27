@@ -100,6 +100,7 @@ class Autoresponder extends phplistPlugin
             $this->logger->debug(
                 sprintf('autoresponder %d campaign %d subscribers ready %d', $ar['id'], $messageId, count($subscribers))
             );
+            $this->selectedSubscribers[$messageId] = $this->loadSubscribers($subscribers);
 
             if (count($subscribers) == 0) {
                 continue;
@@ -126,8 +127,6 @@ class Autoresponder extends phplistPlugin
                 setMessageData($messageId, 'finishsending', $finish);
                 logevent(sprintf('Campaign %d finish sending set to %s', $messageId, date('Y-m-d H:i', $newFinishTime)));
             }
-
-            $this->selectedSubscribers[$messageId] = $this->loadSubscribers($subscribers);
         }
         error_reporting($level);
     }
