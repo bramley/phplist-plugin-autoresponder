@@ -1,3 +1,7 @@
+version 3.6.0+20221127
+      Ensure that $selectedSubscribers is set for all autoresponder campaigns to handle the case of a campaign being requeued manually.
+      Refactor to allow logging of queries
+
 version 3.5.0+20220508
       When the finish sending date of a campaign is near then adjust it to be well into the future to avoid phplist stopping sending.
 

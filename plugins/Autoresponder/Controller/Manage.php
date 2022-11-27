@@ -78,12 +78,13 @@ class Manage extends Controller
      */
     private function messageListData($mid)
     {
-        return array_map(
-            function ($item) {
-                return $item['subject'] . ' (' . $item['list_names'] . ')';
-            },
-            $this->dao->getPossibleMessages($mid)
-        );
+        $listData = [];
+
+        foreach ($this->dao->getPossibleMessages($mid) as $row) {
+            $listData[$row['id']] = $row['subject'] . ' (' . $row['list_names'] . ')';
+        }
+
+        return $listData;
     }
 
     private function delayData()

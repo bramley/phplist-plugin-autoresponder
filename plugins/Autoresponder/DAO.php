@@ -99,15 +99,15 @@ END;
     /**
      * Gets either all available draft messages or a specific message, used when editing an autoresponder.
      *
-     * @param int $mid specific message id
+     * @param int $mid specific message id or 0 for all draft messages not already used
      *
-     * @return array associative array indexed by message id
+     * @return iterator
      */
     public function getPossibleMessages($mid)
     {
         $where = $mid ? "m.id = $mid" : "status = 'draft' AND ar.id IS NULL AND lm.listid != 0";
-        $res = Sql_Query(
-            "SELECT
+        $sql = <<<END
+            SELECT
                 GROUP_CONCAT(
                     DISTINCT l.name
                     ORDER BY l.name
@@ -120,27 +120,21 @@ END;
             INNER JOIN {$this->tables['list']} l ON l.id = lm.listid
             LEFT JOIN {$this->tables['autoresponders']} ar ON m.id = ar.mid
             WHERE $where
-            GROUP BY m.id"
-        );
+            GROUP BY m.id
+END;
 
-        $messages = array();
-
-        while ($row = Sql_Fetch_Array($res)) {
-            $messages[$row['id']] = $row;
-        }
-
-        return $messages;
+        return $this->dbCommand->queryAll($sql);
     }
 
     public function toggleEnabled($id)
     {
-        Sql_Query(
-            "UPDATE {$this->tables['autoresponders']}
+        $sql = <<<END
+            UPDATE {$this->tables['autoresponders']}
             SET enabled = !enabled
-            WHERE id = $id"
-        );
+            WHERE id = $id
+END;
 
-        return true;
+        return $this->dbCommand->queryAffectedRows($sql);
     }
 
     public function pendingSubscribers($arId)
@@ -372,16 +366,13 @@ END;
      */
     public function getAutoresponderForMessage($messageId)
     {
-        $row = Sql_Fetch_Assoc(
-            Sql_Query(<<<END
+        $sql = <<<END
                 SELECT id, addlistid, description
                 FROM {$this->tables['autoresponders']} a
                 WHERE a.mid = $messageId
-END
-            )
-        );
+END;
 
-        return $row;
+        return $this->dbCommand->queryRow($sql);
     }
 
     /**
@@ -394,14 +385,13 @@ END
      */
     public function addSubscriberToList($listId, $userId)
     {
-        $res = Sql_Query(<<<END
+        $sql = <<<END
             INSERT IGNORE INTO {$this->tables['listuser']}
             (listid, userid, entered)
             VALUES ($listId, $userId, now())
-END
-        );
+END;
 
-        return Sql_Affected_Rows();
+        return $this->dbCommand->queryAffectedRows($sql);
     }
 
     /**
