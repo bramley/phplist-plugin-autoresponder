@@ -31,6 +31,7 @@ class Autoresponder extends phplistPlugin
 
     private $dao;
     private $error_level;
+    private $logger;
     private $selectedSubscribers = array();
 
     public function __construct()
