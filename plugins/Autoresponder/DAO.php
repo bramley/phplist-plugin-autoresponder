@@ -291,7 +291,7 @@ END;
             $sql =
                 "SELECT mid FROM {$this->tables['autoresponders']}
                 WHERE id = $id";
-            $mid = $this->dbCommand->queryOne($sql, 'mid');
+            $mid = $this->dbCommand->queryOne($sql);
 
             if ($mid) {
                 $sql =
