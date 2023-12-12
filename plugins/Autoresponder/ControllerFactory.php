@@ -12,7 +12,7 @@
  */
 
 /**
- * This class is a concrete implementation of CommonPlugin_ControllerFactoryBase.
+ * This class is a concrete implementation of phpList\plugin\Common\ControllerFactoryBase.
  *
  * @category  phplist
  */
@@ -30,7 +30,7 @@ class ControllerFactory extends ControllerFactoryBase
      * @param string $pi     the plugin
      * @param array  $params further parameters from the URL
      *
-     * @return CommonPlugin_Controller
+     * @return phpList\plugin\Common\Controller
      */
     public function createController($pi, array $params)
     {
