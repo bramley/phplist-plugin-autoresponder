@@ -30,6 +30,7 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    3.6.2+20231212  Minor internal changes
     3.6.1+20221231  Avoid php 8 deprecation of dynamic properties
     3.6.0+20221127  Fix for problem caused when campaign is submitted or requeued manually
     3.5.0+20220508  Adjust the finish sending date to ensure phplist continues sending a campaign

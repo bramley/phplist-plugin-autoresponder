@@ -1,3 +1,9 @@
+version 3.6.2+20231212
+      Fix .gitignore
+      Remove unnecessary parameter to queryOne()
+      Use namespaced names for Common plugin classes instead of PEAR names
+      Update CS fixer
+
 version 3.6.1+20221231
       Avoid php 8 deprecation of dynamic properties
 
