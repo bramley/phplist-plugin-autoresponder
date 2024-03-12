@@ -22,10 +22,13 @@ use WebblerListing;
 
 class Populator implements IPopulator
 {
+    private $dao;
+    private $responders;
+
     public function __construct(DAO $dao, $listId)
     {
         $this->dao = $dao;
-        $this->listId = $listId;
+        $this->responders = $this->dao->getAutoresponders($listId, false);
     }
 
     public function populate(WebblerListing $w, $start, $limit)
@@ -33,7 +36,7 @@ class Populator implements IPopulator
         $w->setTitle('Autoresponders');
         $w->setElementHeading('Autoresponder');
 
-        foreach (new \LimitIterator($this->dao->getAutoresponders($this->listId, false), $start, $limit) as $item) {
+        foreach (new \LimitIterator($this->responders, $start, $limit) as $item) {
             $key = "{$item['id']} | {$item['description']}";
 
             if ($item['messageid']) {
@@ -81,7 +84,7 @@ class Populator implements IPopulator
 
     public function total()
     {
-        return count($this->dao->getAutoresponders($this->listId, false));
+        return count($this->responders);
     }
 
     private function confirmDeleteButton($id)

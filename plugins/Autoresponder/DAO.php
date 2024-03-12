@@ -195,27 +195,21 @@ END;
 
     /**
      * Returns the fields for all autoresponders or for those autoresponders whose campaigns are sent to a specific list.
-     * The result is cached as this method can be called several times.
      *
-     * @param int  $listId  optional list id
-     * @param bool $enabled whether to return only enabled or all autoresponders
+     * @param int  $listId      optional list id
+     * @param bool $enabledOnly whether to return only enabled or all autoresponders
      *
      * @return Iterator
      */
-    public function getAutoresponders($listId = 0, $enabled = true)
+    public function getAutoresponders($listId = 0, $enabledOnly = true)
     {
-        static $responders = null;
-
-        if ($responders !== null) {
-            return $responders;
-        }
         $w = [];
 
         if ($listId > 0) {
             $w[] = "lm.listid = $listId";
         }
 
-        if ($enabled) {
+        if ($enabledOnly) {
             $join = 'JOIN';
             $w[] = 'ar.enabled';
         } else {
