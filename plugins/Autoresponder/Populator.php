@@ -33,7 +33,7 @@ class Populator implements IPopulator
         $w->setTitle('Autoresponders');
         $w->setElementHeading('Autoresponder');
 
-        foreach ($this->dao->getAutoresponders($this->listId, false) as $item) {
+        foreach (new \LimitIterator($this->dao->getAutoresponders($this->listId, false), $start, $limit) as $item) {
             $key = "{$item['id']} | {$item['description']}";
 
             if ($item['messageid']) {
