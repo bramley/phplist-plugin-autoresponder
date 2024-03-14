@@ -34,7 +34,4 @@ return [
             $container->get('phpList\plugin\Common\DB')
         );
     },
-    'Logger' => function (ContainerInterface $container) {
-        return \phpList\plugin\Common\Logger::instance();
-    },
 ];

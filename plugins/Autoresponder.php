@@ -11,6 +11,7 @@
  * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License, Version 3
  */
 use chdemko\BitArray\BitArray;
+use phpList\plugin\Common\Container;
 use phpList\plugin\Common\PageLink;
 use phpList\plugin\Common\PageURL;
 
@@ -51,7 +52,7 @@ class Autoresponder extends phplistPlugin
     public function activate()
     {
         $depends = include $this->coderoot . 'depends.php';
-        $container = new phpList\plugin\Common\Container($depends);
+        $container = new Container($depends);
         $this->dao = $container->get('DAO');
         $this->logger = $container->get('Logger');
         $this->pageTitles = array(
@@ -76,7 +77,6 @@ class Autoresponder extends phplistPlugin
                 &&
                 version_compare($plugins['CommonPlugin']->version, '3.18.4') >= 0
             ),
-            'PHP version 5.4.0 or greater' => version_compare(PHP_VERSION, '5.4') > 0,
             'phpList version 3.3.2 or later' => version_compare(VERSION, '3.3.2') >= 0,
         );
     }
