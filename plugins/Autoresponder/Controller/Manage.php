@@ -135,6 +135,7 @@ class Manage extends Controller
             array('class' => 'autosubmit')
         );
         $listing = new Listing($this, new Populator($this->dao, $listId));
+        $listing->pager->setItemsPerPage([10, 25], 10);
 
         if (isset($_SESSION['autoresponder_errors'])) {
             $errors = $_SESSION['autoresponder_errors'];

@@ -1,3 +1,9 @@
+version 3.6.3+20240315
+      Correct the pagination
+      Remove caching of results of getAutoresponders()
+      Tidy-up some code
+      Display fewer autoresponders on the Manage page
+
 version 3.6.2+20231212
       Fix .gitignore
       Remove unnecessary parameter to queryOne()
