@@ -30,6 +30,7 @@ For guidance on usage see the plugin page within the phplist documentation site 
 ## Version history ##
 
     version         Description
+    3.6.4+20251204  Fix an error in the adjustment of a campaign's finish sending time
     3.6.3+20240315  Correct the pagination
                     Display fewer autoresponders on the Manage page
     3.6.2+20231212  Minor internal changes

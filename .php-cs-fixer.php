@@ -24,8 +24,9 @@ return $config->setRules([
         'single_line_comment_style' => false,
         'visibility_required' => false,
         'phpdoc_to_comment' => false,
-        'function_typehint_space' => false,
+        'type_declaration_spaces' => false,
         'global_namespace_import' => false,
+        'blank_line_after_opening_tag' => false,
     ])
     ->setFinder($finder)
 ;
