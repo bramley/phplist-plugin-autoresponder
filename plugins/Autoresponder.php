@@ -112,8 +112,9 @@ class Autoresponder extends phplistPlugin
             $this->logger->debug(sprintf('rows deleted %d', $rows));
 
             // Adjust the finish sending date to be well into the future
-            $finish = $ar['finishSending'];
+            $finish = unserialize(substr($ar['finishsending'], 4));
             $finishTime = mktime($finish['hour'], $finish['minute'], 0, $finish['month'], $finish['day'], $finish['year']);
+            $this->logger->debug($finishTime);
 
             if ($finishTime < time() + (24 * 60 * 60)) {
                 $newFinishTime = time() + DEFAULT_MESSAGEAGE;
