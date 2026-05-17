@@ -24,6 +24,8 @@ use phpList\plugin\Common\PageLink;
 use phpList\plugin\Common\PageURL;
 use phpList\plugin\Common\Toolbar;
 
+use function phpList\plugin\Common\listDataByCategory;
+
 class Manage extends Controller
 {
     private $dao;
@@ -189,7 +191,7 @@ class Manage extends Controller
         $listSelect = CHtml::dropDownList(
             'addlist',
             $params['addlistid'],
-            array_column(iterator_to_array($this->listDao->listsForOwner(0)), 'name', 'id'),
+            listDataByCategory($this->listDao->listsForOwner(0)),
             array('prompt' => s('Select ...'))
         );
 

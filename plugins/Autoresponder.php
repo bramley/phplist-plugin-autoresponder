@@ -72,11 +72,10 @@ class Autoresponder extends phplistPlugin
         global $plugins;
 
         return array(
-            'Common plugin v3.18.4 or later must be enabled' => (
+            'Common plugin v3.35.4 or later must be enabled' => (
                 phpListPlugin::isEnabled('CommonPlugin')
-                && version_compare($plugins['CommonPlugin']->version, '3.18.4') >= 0
+                && version_compare($plugins['CommonPlugin']->version, '3.35.4') >= 0
             ),
-            'phpList version 3.3.2 or later' => version_compare(VERSION, '3.3.2') >= 0,
         );
     }
 
